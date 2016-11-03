@@ -334,6 +334,7 @@ Custom property | Description | Default
     _onMenuSelect: function(data) {
       event.stopPropagation();
       event.preventDefault();
+      this._toggleMenuOff();
       console.log(data);
       return false;
     }
