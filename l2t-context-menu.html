@@ -92,8 +92,16 @@ Custom property | Description | Default
     }                                       
   </style>
   <template>
+
     <paper-menu id="context-menu" class="context-menu">
-      <content></content>
+      <template is="dom-if" if="[[title]]">
+        <h1 class="title">[[title]]</h1>
+      </template>
+      <!--<div class="dropdown-content">-->
+      <template id="resultList" is="dom-repeat" items="{{menu}}" as="m" filter="_doFilter">
+        <paper-item command="m.command" on-iron-select="_menuClick">{{m.description}}</paper-item>
+      </template>
+      <!--</div>-->
     </paper-menu>
   </template>
 </dom-module>
@@ -127,6 +135,17 @@ Custom property | Description | Default
         type: Boolean,
         value: 'false',
         notify: true
+        },
+        /**
+         * Pass Menu To Build On Fly
+         *
+         * @attribute menu
+         * @type Object
+         * @default none
+         */
+        menu: {
+          type: Object,
+          notify: true
         },
       },
       /**
@@ -260,7 +279,31 @@ Custom property | Description | Default
       */
       ready: function() {
         this._listenerInit();
-      }
+        contextMenu = this;
+      },
+      showMenu: function(menuData,e,menu,node,newHandleSelect) {
+        // Build Menu
+        var aMenu;
+        var buildMenu = [];
+        var i = 0;
+        while (aMenu = menuData[i++]) {
+          if (aMenu.type == menu) {
+            if (aMenu.description == "-") {
+            } else {
+              buildMenu.push(aMenu);
+            }
+          }
+        }
+        this.menu = buildMenu;
+        this.ownerNode = e;
+        this.handleSelect = newHandleSelect;
+        this._openContextMenu(node);
+      },
+      _openContextMenu: function (e) {
+        var $this = this;
+        taskItemInContext=$this._clickInsideElement(e, $this.parentclass),
+        taskItemInContext?(e.preventDefault(),$this._toggleMenuOn(),$this._positionMenu(e)):(taskItemInContext=null,$this._toggleMenuOff())
+      },
     });
   })();
 </script>
