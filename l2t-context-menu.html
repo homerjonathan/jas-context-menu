@@ -32,7 +32,7 @@ The following custom properties are available for styling:
 
 Custom property | Description | Default
 ----------------|-------------|----------
-`--context-background-color` | Background color of the menu. | `#fff`
+`--app-primary-color` | Background color of the menu when focused. | `#fff`
 `--context-text-color` | Text color within the menu. | `#333`
 `--context-link-text-color` | Text color and on hover background color for links<br>For text within 'A' tags. | `#0066aa`
 `--context-horizontal-rule-color` | Color of 'HR' tags. | `#bcbcbc`
@@ -52,55 +52,18 @@ Custom property | Description | Default
       -moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.4);
       box-shadow:0 2px 5px 0 rgba(0,0,0,.4);
     }
-
     .context-menu--active {
       display: block;
     }
-
-    li, paper-item{
-      display: block;
-      color: var(--context-text-color, #333);
-      padding: 2px;
-    }
-
     paper-item {
       cursor: pointer;
     }
-
-    li:last-child {
-      margin-bottom: 0;
-    }
-
-    content a {
-      display: block;
-      color: var(--context-link-text-color, #0066aa);
-      padding: 4px 12px;
-      text-decoration: none;
-    }
-
-    content a:hover {
-      background-color: var(--context-link-text-color, #0066aa);
-      color: var(--context-background-color, #fff);
-    }
-
     paper-item {
-      display: block;
-      color: var(--context-link-text-color, #0066aa);
-      padding: 4px 12px;
-      text-decoration: none;
+      color: var(--app-primary-color, #0066aa);
     }
-
     paper-item:hover {
-      background-color: var(--context-link-text-color, #0066aa);
-      color: var(--context-background-color, #fff);
-    }
-
-    content hr {
-      border-color: var(--context-horizontal-rule-color, #bcbcbc);
-    }
-
-    content .paper-menu-0{
-      background-color: var(--context-background-color, #fff);
+      background-color: var(--app-primary-color, #0066aa);
+      color: var(--app-primary-text-color, #fff);
     }
   </style>
   <template>
