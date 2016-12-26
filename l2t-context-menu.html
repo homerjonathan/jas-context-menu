@@ -47,7 +47,7 @@ Custom property | Description | Default
       display: none;
       position: absolute;
       z-index: 1000;
-      padding: 12px;
+      padding: 6px;
       background-color: var(--context-background-color, #fff);
       -moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.4);
       box-shadow:0 2px 5px 0 rgba(0,0,0,.4);
@@ -57,54 +57,54 @@ Custom property | Description | Default
       display: block;
     }
 
-    ::content li, ::content paper-item{
+    li, paper-item{
       display: block;
       color: var(--context-text-color, #333);
       padding: 2px;
     }
 
-    ::content paper-item {
+    paper-item {
       cursor: pointer;
     }
 
-    ::content li:last-child {
+    li:last-child {
       margin-bottom: 0;
     }
 
-    ::content a {
+    content a {
       display: block;
       color: var(--context-link-text-color, #0066aa);
       padding: 4px 12px;
       text-decoration: none;
     }
 
-    ::content a:hover {
+    content a:hover {
       background-color: var(--context-link-text-color, #0066aa);
       color: var(--context-background-color, #fff);
     }
 
-    ::content paper-item {
+    paper-item {
       display: block;
       color: var(--context-link-text-color, #0066aa);
       padding: 4px 12px;
       text-decoration: none;
     }
 
-    ::content paper-item:hover {
+    paper-item:hover {
       background-color: var(--context-link-text-color, #0066aa);
       color: var(--context-background-color, #fff);
     }
 
-    ::content hr {
+    content hr {
       border-color: var(--context-horizontal-rule-color, #bcbcbc);
     }
 
-    ::content .paper-menu-0{
+    content .paper-menu-0{
       background-color: var(--context-background-color, #fff);
     }
   </style>
   <template>
-    <div class="context">
+    <div class="content">
       <paper-menu id="context-menu" class="context-menu" allowOutsideScroll selected="-1">
         <template id="resultList" is="dom-repeat" items="{{menu}}" as="m">
           <template is="dom-if" if="[[m.submenu]]">
