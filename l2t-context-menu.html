@@ -234,8 +234,8 @@ Custom property | Description | Default
      *
      */
     _listenerInit : function() {
-      //    this._contextListener();
-      //  this._clickListener();
+      //    this._contextListener()
+      this._clickListener();
       this._keyupListener();
       this._resizeListener();
     },
@@ -288,20 +288,13 @@ Custom property | Description | Default
       var $this = this;
       $this._toggleMenuOn();
       $this._positionMenu(e);
-
-//        taskItemInContext=$this._clickInsideElement(e, $this.parentclass),
-//        taskItemInContext?(e.preventDefault(),$this._toggleMenuOn(),
-//                $this._positionMenu(e)):(taskItemInContext=null,
-//                $this._toggleMenuOff())
     },
     _onMenuSelect: function(data) {
       event.stopPropagation();
       event.preventDefault();
       this._toggleMenuOff();
-      console.log(data);
+      this.handleSelect(data.target.command,this.ownerNode);
       return false;
     }
   });
-
-
 </script>
