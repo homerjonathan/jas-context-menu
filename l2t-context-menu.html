@@ -57,8 +57,6 @@ Custom property | Description | Default
     }
     paper-item {
       cursor: pointer;
-    }
-    paper-item {
       color: var(--app-primary-color, #0066aa);
     }
     paper-item:hover {
@@ -67,23 +65,14 @@ Custom property | Description | Default
     }
   </style>
   <template>
-    <div class="content">
-      <paper-menu id="context-menu" class="context-menu" allowOutsideScroll selected="-1">
+    <div id="node" class="content">
+      <paper-menu id="contextMenu" class="context-menu" allowOutsideScroll selected="-1">
         <template id="resultList" is="dom-repeat" items="{{menu}}" as="m">
           <template is="dom-if" if="[[m.submenu]]">
-            <paper-submenu >
-              <paper-item role="menuitem" class="menu-trigger">[[m.description]]</paper-item>
-              <paper-menu class="menu-content sublist2">
-                <paper-material class="dropdown-content" elevation="3">
-                  <template id="resultListSub" is="dom-repeat" items="{{m.submenu}}" as="sm">
-                    <paper-item command="[[sm.command]]" on-tap="_onMenuSelect">[[sm.description]]</paper-item>
-                  </template>
-                </paper-material>
-              </paper-menu>
-            </paper-submenu>
+              <paper-item class="menu-trigger" role="menuitem" submenu="[[m.submenu]]" on-tap="_onSubMenuSelect">[[m.description]]</paper-item>
           </template>
           <template is="dom-if" if="[[!m.submenu]]">
-            <paper-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect" on-contextmenu="_menuClick(m)">[[m.description]]</paper-item>
+            <paper-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect">[[m.description]]</paper-item>
           </template>
         </template>
       </paper-menu>
@@ -93,8 +82,11 @@ Custom property | Description | Default
 <script>
   var contextMenu;
 
-  Polymer({
+  Lt2ContextMenu = Polymer({
     is: 'l2t-context-menu',
+    factoryImpl: function(mainMenu) {
+        this.mainMenu = mainMenu;
+    },
     properties: {
       /**
        * Sting for storing class name
@@ -141,7 +133,7 @@ Custom property | Description | Default
      */
     _toggleMenuOn: function (){
       1!==this._menuState&&(this._menuState=1,
-              this.$["context-menu"].classList.add('context-menu--active'));
+              this.$.contextMenu.classList.add('context-menu--active'));
       // Error catcher for IE and Edge
       if (typeof navigator.vibrate === "function") {
         navigator.vibrate([25])
@@ -153,7 +145,7 @@ Custom property | Description | Default
      *
      */
     _toggleMenuOff: function(){
-      0!==this._menuState&&(this._menuState=0,this.$["context-menu"].classList.remove('context-menu--active'))
+      0!==this._menuState&&(this._menuState=0,this.$.contextMenu.classList.remove('context-menu--active'))
     },
     /**
      * Method to work out to place
@@ -161,11 +153,13 @@ Custom property | Description | Default
      *
      */
     _clickInsideElement: function(e,t) {
-      var n=e.srcElement||e.target;
-      if(n.classList.contains(t))return n;
-      for(;n=n.parentNode;)
-        if(n.classList&&n.classList.contains(t))return n;
-      return!1
+//      var n=e.srcElement||e.target;
+//      if(n.classList.contains(t))return n;
+//      for(;n=n.parentNode;)
+//        if(n.classList&&n.classList.contains(t))return n;
+//      return!1
+        var n = e.path[0];
+        if (n.classList.contains(t)) return n;
     },
     /**
      * Method to listen for clicks
@@ -180,20 +174,6 @@ Custom property | Description | Default
         if(!t)
           var n=e.which||e.button;
         1===n&&$this._toggleMenuOff()
-      })
-    },
-    /**
-     * Method to listen for context menu
-     * and pass data on to _clickInsideElement
-     * shows menu is click is in parentclass
-     *
-     */
-    _contextListener: function(){
-      var taskItemInContext,
-              $this = this;
-      document.addEventListener("contextmenu",function(e){
-        taskItemInContext=$this._clickInsideElement(e, $this.parentclass),
-                taskItemInContext?(e.preventDefault(),$this._toggleMenuOn(),$this._positionMenu(e)):(taskItemInContext=null,$this._toggleMenuOff())
       })
     },
     /**
@@ -234,7 +214,6 @@ Custom property | Description | Default
      *
      */
     _listenerInit : function() {
-      //    this._contextListener()
       this._clickListener();
       this._keyupListener();
       this._resizeListener();
@@ -247,7 +226,7 @@ Custom property | Description | Default
      */
     _positionMenu: function(e){
       clickCoords = this._getPosition(e),
-              menuSelector =  this.$["context-menu"],
+              menuSelector =  this.$.contextMenu,
               menuWidth = menuSelector.offsetWidth + 4,
               menuHeight = menuSelector.offsetHeight + 4,
               windowWidth = window.innerWidth + (clickCoords.x - e.clientX),
@@ -259,12 +238,16 @@ Custom property | Description | Default
     },
     /**
      * Method the scripts
-     * domReady for when the dom is... rea
+     * domReady for when the dom is ready
      *
      */
     ready: function() {
       this._listenerInit();
-      contextMenu = this;
+      // Main Menu - Sub Menu a copy is not linked as the main context menu
+      if (contextMenu == undefined) {
+          contextMenu = this;
+      }
+
     },
     showMenu: function(menuData,e,menu,node,newHandleSelect) {
       // Build Menu
@@ -280,6 +263,7 @@ Custom property | Description | Default
         }
       }
       this.menu = buildMenu;
+      this.menuType = menu;
       this.ownerNode = e;
       this.handleSelect = newHandleSelect;
       this._openContextMenu(node);
@@ -288,6 +272,19 @@ Custom property | Description | Default
       var $this = this;
       $this._toggleMenuOn();
       $this._positionMenu(e);
+    },
+    _onSubMenuSelect: function(data) {
+        event.stopPropagation();
+        event.preventDefault();
+        if (this.submenu == undefined) {
+            this.submenu = new Lt2ContextMenu(this);
+            this.submenu.setAttribute('id',"lt2submenu");
+            this.parentNode.appendChild(this.submenu);
+        }
+        data.clientX = data.detail.x;
+        data.clientY = data.detail.y;
+        this.submenu.showMenu(data.target.submenu,this,this.menuType,data, this.handleSelect);
+        return false;
     },
     _onMenuSelect: function(data) {
       event.stopPropagation();
