@@ -1,13 +1,13 @@
 {
-  "name": "sams-context-menu",
+  "name": "jas-context-menu",
   "version": "2.0.0",
   "description": "Polymer element to replace right click functionality based on code developed by Andrew Bone <AndrewB05@gmail.com>",
   "homepage": "https://github.com/Link2Twenty/l2t-context-menu",
   "authors": ["Andrew Bone <AndrewB05@gmail.com>","Jonathan Homer"],
-  "main": "sams-context-menu.html",
+  "main": "jas-context-menu.html",
   "repository": {
     "type": "git",
-    "url": "git://github.com/homerjonathan/sams-context-menu.git"
+    "url": "git://github.com/homerjonathan/jas-context-menu.git"
   },
   "keywords": ["polymer","context-menu","menu","right-click","web-components"],
   "license": "MIT",
