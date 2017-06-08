@@ -25,6 +25,6 @@
     "iron-validator-behavior": "PolymerElements/iron-validator-behavior#^1.0.0",
     "paper-icon-button": "PolymerElements/paper-icon-button#^2.0.0",
     "test-fixture": "PolymerElements/test-fixture#^2.0.0",
-    "web-component-tester": "^4.0.0",
+    "web-component-tester": "^4.0.0"
   }
 }
