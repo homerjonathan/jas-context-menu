@@ -1,905 +1,299 @@
-<!--<link rel="import" href="../l2t-context-menu/l2t-context-menu.html">-->
-
-
-<!--
-Copyright (c) 2014 Wassim Chegham. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-menu/paper-menu.html" />
+<link rel="import" href="../paper-menu/paper-submenu.html" />
 
 <!--
-Element that enables any DOM element to be draggable and resizable.
+  Polymer element to replace right click functionality.
 
-##### Example
+  ### Examples
+  You can do anything you would expect to be able to do within paper-menu. See the documentation for that element here: <a href="https://elements.polymer-project.org/elements/paper-menu">Paper-menu</a>.
+  The only real difference is that l2t-context-menu tags are used as the initial paper-menu tags.
 
-    <drag-resize></drag-resize>
+      <l2t-context-menu parentclass="standardExample">
+        <paper-item>
+          <a href="#">Normal Item</a>
+        </paper-item>
+      </l2t-context-menu>
+      
+  You may need to use actual paper-menu tags further down the chain if they are required, like when using submenus for instance.
 
-@element drag-resize
-@blurb Element that enables any DOM element to be draggable and resizable.
-@status alpha
-@homepage https://github.io/manekinekko/drag-resize
-@demo demo/index.html
+      <l2t-context-menu parentclass="submenuExample">
+        <paper-submenu opened>
+          <paper-item class="menu-trigger">Submenu Head</paper-item>
+          <paper-menu class="menu-content">
+            <paper-item><a href='#'>Submenu Item</a></paper-item>
+          </paper-menu>
+        </paper-submenu>
+      </l2t-context-menu>
+  
+  ### Styling
+    
+The following custom properties are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--app-primary-color` | Background color of the menu when focused. | `#fff`
+`--context-text-color` | Text color within the menu. | `#333`
+`--context-link-text-color` | Text color and on hover background color for links<br>For text within 'A' tags. | `#0066aa`
+`--context-horizontal-rule-color` | Color of 'HR' tags. | `#bcbcbc`
+
+  @element l2t-context-menu
+  @demo demo/index.html
 -->
-<dom-module id="paper-drag-drop">
-  <style>
 
-    .drag-elastic-band {
-      border: 1px dotted rgb(8, 253, 25);
-      display: none;
-      position: absolute;
-    }
-
-    .drag-resize-selected {
-      border: 1px dotted rgb(0, 150, 253);
-      cursor: move;
-      display: block;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      z-index: 999;
-      transform: translate3d(0, 0, 0);
-      -webkit-transform: translate3d(0, 0, 0);
-      /*transition: all 0.1s linear;*/
-    }
-
-    .drag-resize-handlers {
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      font-size: 1px;
-      background: rgb(0, 150, 253);
-      -webkit-transition: all 0.1s linear;
-      transition: all 0.1s linear;
-      opacity: 1;
-    }
-
-    :host(.drag-resize-selected) .drag-resize-handlers {
-      opacity: 1;
-    }
-
-    .drag-resize-handlers:hover {
-      transform: scale(1.6); /*chrome*/
-      -webkit-transform: scale(1.6); /*nodewebkit*/
-    }
-
-    /*
-     Individual corner classes - required for resize support.
-    */
-    .drag-resize-handlers[data-direction="tl"] {
-      top: -5px;
-      left: -5px;
-      cursor: nw-resize;
-    }
-    .drag-resize-handlers[data-direction="tm"] {
-      top: -5px;
-      left: 50%;
-      margin-left: -5px;
-      cursor: n-resize;
-    }
-    .drag-resize-handlers[data-direction="tr"] {
-      top: -5px;
-      right: -5px;
-      cursor: ne-resize;
-    }
-
-    .drag-resize-handlers[data-direction="ml"] {
-      top: 50%;
-      margin-top: -5px;
-      left: -5px;
-      cursor: w-resize;
-    }
-    .drag-resize-handlers[data-direction="mr"] {
-      top: 50%;
-      margin-top: -5px;
-      right: -5px;
-      cursor: e-resize;
-    }
-
-    .drag-resize-handlers[data-direction="bl"] {
-      bottom: -5px;
-      left: -5px;
-      cursor: sw-resize;
-    }
-    .drag-resize-handlers[data-direction="bm"] {
-      bottom: -5px;
-      left: 50%;
-      margin-left: -5px;
-      cursor: s-resize;
-    }
-    .drag-resize-handlers[data-direction="br"] {
-      bottom: -5px;
-      right: -5px;
-      cursor: se-resize;
-    }
-
-    .hidden {
-      display: none;
-    }
-  </style>
+<dom-module id="jas-context-menu">
   <template>
-    <!--<l2t-context-menu id="dragdrop_contextmenu"></l2t-context-menu>-->
-    <div id="drag-elastic-band" class="drag-elastic-band"></div>
-    <div id="resizable_handlers">
-      <template id="selectedelements" is="dom-repeat" items="{{selectedElements}}">
-        <div id="{{item.name}}" class="drag-resize-selected" on-track="ontrack" >
-          <div class="drag-resize-handlers" data-direction="tl"></div>
-          <div class="drag-resize-handlers" data-direction="tm"></div>
-          <div class="drag-resize-handlers" data-direction="tr"></div>
-          <div class="drag-resize-handlers" data-direction="mr"></div>
-          <div class="drag-resize-handlers" data-direction="ml"></div>
-          <div class="drag-resize-handlers" data-direction="bl"></div>
-          <div class="drag-resize-handlers" data-direction="bm"></div>
-          <div class="drag-resize-handlers" data-direction="br"></div>
-        </div>
-      </template>
+    <style>
+      .context-menu {
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        padding: 6px;
+        background-color: var(--context-background-color, #fff);
+        -moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.4);
+        box-shadow:0 2px 5px 0 rgba(0,0,0,.4);
+      }
+      .context-menu--active {
+        display: block;
+      }
+      paper-item {
+        cursor: pointer;
+        color: var(--app-primary-color, #0066aa);
+      }
+      paper-item:hover {
+        background-color: var(--app-primary-color, #0066aa);
+        color: var(--app-primary-text-color, #fff);
+      }
+    </style>
+    <div id="node" class="content">
+      <paper-menu id="contextMenu" class="context-menu" allowOutsideScroll selected="-1">
+        <template id="resultList" is="dom-repeat" items="{{menu}}" as="m">
+          <template is="dom-if" if="[[m.submenu]]">
+              <paper-item class="menu-trigger" role="menuitem" submenu="[[m.submenu]]" on-tap="_onSubMenuSelect">[[m.description]]</paper-item>
+          </template>
+          <template is="dom-if" if="[[!m.submenu]]">
+            <paper-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect">[[m.description]]</paper-item>
+          </template>
+        </template>
+      </paper-menu>
     </div>
   </template>
 </dom-module>
-<!--
-
--->
 <script>
+  var contextMenu;
 
-  Polymer({
-    is: "paper-drag-drop",
-    selectedElement: null,
-    /**
-     * `resizeHandle` is the resize handler of the element.
-     *
-     * @property resizeHandle
-     * @type DOMElement
-     * @default null
-     */
-    resizeHandle: null,
-    enable: true,
-    /**
-     * `bbox` is the Bounding box area, in pixels.
-     *
-     * @property bbox
-     * @type object
-     * @default { elmX: 0, elmY: 0, elmH: 0, elmW: 0 }
-     */
-    bbox: {
-      elmX: 0,
-      elmY: 0,
-      elmH: 0,
-      elmW: 0
-    },
-    /**
-     * `mouse` is the mouse information.
-     *
-     * @property mouse
-     * @type object
-     * @default { x: 0, y: 0, last: { x: 0, y: 0 }, offset: { x: 0, y: 0 } }
-     */
-    mouse: {
-      x: 0,
-      y: 0,
-      last: {
-        x: 0,
-        y: 0
-      },
-      offset: {
-        x: 0,
-        y: 0
-      }
-    },
-    menuData: [
-      {type: "single", description: "Delete", command: "delete"},
-      {type: "single", description: "-", command: "delete"},
-      {type: "single", description: "Align", command: "",
-        submenu:[
-          {type: "single", description: "Left", command: "align-left"},
-          {type: "single", description: "Right", command: "align-right"}
-        ]}
-    ],
-    // add properties and methods on the element's prototype
-    properties: {
-      selectedElements: {
-        type: Array,
-        notify: true,
-        value: []
-      },
+  class JasContextMenu extends Polymer.Element {
+      static get is() { return 'jas-context-menu'; }
 
-      aspectRatio: {
-        /**
-         * `aspectRatio` is a property that preserves the aspectRatio.
-         *
-         * @property aspectRatio
-         * @type bool
-         * @default false
-         */
-        type: Boolean,
-        value: false
-      },
-      allowBlur: {
-        /**
-         * `allowBlur` is the attributes that allows automatic blur onclick.
-         *
-         * @property allowBlur
-         * @type bool
-         * @default true
-         */
-        type: Boolean,
-        value: true
-      },
-      /**
-       * `zIndex` is the highest Z-Index allocated.
-       *
-       * @property zIndex
-       * @type number
-       * @default 1
-       */
-      zIndex: {
-        type: Number,
-        value: 1
-      },
-      /**
-       * `minWidth` is the minimum pixel width of the element.
-       *
-       * @property minWidth
-       * @type number
-       * @default 30
-       */
-      minWidth: {
-        type: Number,
-        value: 10
-      },
-
-      /**
-       * `minHeight` is the minimum pixel height of the element.
-       *
-       * @property minHeight
-       * @type number
-       * @default 30
-       */
-      minHeight: {
-        type: Number,
-        value: 10
-      },
-      /**
-       * `minLeft` is the minimum left position, in pixels.
-       *
-       * @property minLeft
-       * @type number
-       * @default -9999
-       */
-      minLeft: {
-        type: Number,
-        value: -9999
-      },
-
-      /**
-       * `maxLeft` is the maximum left position, in pixels.
-       *
-       * @property maxLeft
-       * @type number
-       * @default 9999
-       */
-      maxLeft: {
-        type: Number,
-        value: 9999
-      },
-
-      /**
-       * `minTop` is the minimum top position, in pixels.
-       *
-       * @property minTop
-       * @type number
-       * @default -9999
-       */
-      minTop: {
-        type: Number,
-        value: -9999
-      },
-
-      /**
-       * `maxTop` is the minimum top position, in pixels.
-       *
-       * @property maxTop
-       * @type number
-       * @default 9999
-       */
-      maxTop: {
-        type: Number,
-        value: 9999
-      },
-
-      /**
-       * `zoomRatio` is the zoom ratio used to scale the element.
-       *
-       * @property zoomRatio
-       * @type number
-       * @default 1
-       */
-      zoomRatio: {
-        type: Number,
-        value: 1
-      },
-
-      /**
-       * `zoomLevel` is the original zoom level.
-       *
-       * @property zoomLevel
-       * @type number
-       * @default 1
-       */
-      zoomLevel: {
-        type: Number,
-        value: 1
-      },
-      class: {
-        type: String,
-        value: "drag-resize",
-        reflectToAttribute: true
-      }
-    },
-    listeners: {
-      'tap': 'ontap',
-      'track': 'ontrack',
-      contextmenu: '_generateMenu'
-    },
-    /**
-     * Set the zoom level. This value is used to make sure
-     * the resizable component is always visible and usable
-     * when the user zoom in.
-     *
-     * @method setZoom
-     * @param {Number} zoom values from 0.1 to 2
-     */
-    setZoom: function(zoom) {
-      this.zoomLevel = zoom;
-
-      if (zoom < 0.6) {
-        this.zoomRatio = 1/zoom;
-        this.displayHandlers(['bm', 'tm', 'mr', 'ml']);
-        this.style.border = '0 none';
-      }
-      else {
-        this.zoomRatio = 1;
-        this.displayHandlers();
-        this.style.border = '';
-      }
-    },
-
-    /**
-     * Toggle the debug info tooltip
-     *
-     * @method toggleDebugInfo
-     */
-    toggleDebugInfo: function(){
-      this.$.debug_info.classList.toggle('hidden');
-    },
-
-    /**
-     * This method returns the floor value from a decimal value.
-     *
-     * @method ToFloor
-     * @param {Number} value The decimal value to compute.
-     * @return {Number} the floor value.
-     */
-    ToFloor: function(value) {
-      return value | 0;
-    },
-
-    /**
-     * This method is used to show all or a subset of the resize handlers.
-     *
-     * @method displayHandlers
-     * @param {Array} filters An array of the handlers to show. If the array is empty or not provided, then all the handlers are shown.
-     */
-    displayHandlers: function(filters){
-
-      var handlersContainer = this.$.resizable_handlers;
-      var handlers = [].slice.call(handlersContainer.querySelectorAll('[data-direction]'));
-
-      if(filters && filters.length>0){
-
-        // first, hide all
-        handlers.forEach(function(handler, index, self){
-          handler.style.visibility = 'hidden';
-        });
-
-        // show filtered only
-        filters.map(function(filter, index, self){
-          var dom = handlersContainer.querySelector('[data-direction="'+filter+'"]');
-          if(dom){
-            dom.style.visibility = 'visible';
-          }
-          return dom;
-        });
-
-      }
-      else {
-        // show all
-        handlers.forEach(function(handler, index, self){
-          handler.style.visibility = 'visible';
-        });
-      }
-    },
-
-    /**
-     * Adgjusts the font size of the resized element.
-     *
-     * @method adjustFontSize
-     * @param  {DOMElement} elem The element whose font size should be adjusted.
-     */
-    adjustFontSize: function(elem){
-      var compressor = 3.5;
-      var minFontSize = 8;
-      var maxFontSize = 100;
-      var val = elem.getBoundingClientRects().width / (compressor*10);
-      elem.style.fontSize = Math.max(Math.min(val, parseFloat(maxFontSize)), parseFloat(minFontSize));
-    },
-
-    /**
-     * Extra callbacks usefull when resizing the element.
-     *
-     * @method dragfocus
-     */
-    dragfocus: function() {},
-
-    /**
-     * Extra callbacks useful when resizing the element.
-     *
-     * @method dragstart
-     */
-    dragstart: function() {},
-
-    /**
-     * Extra callbacks useful when resizing the element.
-     *
-     * @method dragmove
-     */
-    dragmove: function() {},
-
-    /**
-     * Extra callbacks useful when resizing the element.
-     *
-     * @method dragend
-     */
-    dragend: function() {},
-
-    /**
-     * Extra callbacks useful when resizing the element.
-     *
-     * @method dragblur
-     */
-    dragblur: function() {},
-
-    /**
-     * The `ontap` handler.
-     *
-     * @method ontap
-     * @param  {Event} event The `ontap` event.
-     */
-    ontap: function(event){
-      event.stopPropagation();
-      event.preventDefault();
-    },
-
-    /**
-     * The `ontrack` handler.
-     *
-     * @method ontrack
-     * @param  {Event} event The `ontrack` event.
-     */
-    ontrack: function(e){
-      switch(e.detail.state) {
-        case 'start':
-          this.drag(e);
-          break;
-        case 'track':
-          this.dragging(e);
-          break;
-        case 'end':
-          console.log("End Dragging!");
-          break;
-      }
-      event.stopPropagation();
-      event.preventDefault();
-    },
-
-    /**
-     * Focus (select) the active element.
-     *
-     * @method focus
-     * @param  {DOMElement} newElement The element to be selected.
-     */
-    focus: function(newElement, replace){
-      // Should only be called when new item selected.  Otherwise something has gone wrong.
-      if (replace == true) {
-        // Clear Out Result
-        this.selectedElements = [];
-      }
-      if ( this.enable && newElement && !newElement.classList.contains('drag-resize-selected') ) {
-        // Add With Index Name - Use Polymer so it can see the request
-        var elementObj = this._elementAlreadyAdded(newElement);
-        // Force immediate render.  No performance issues as only human speed of clicking
-        this.$.selectedelements.render();
-        // Not the most elegant but...grab overlay
-        var overlay = this.$$('#'+elementObj.name);
-        // Hook
-        elementObj.overlay = overlay;
-        var position = this.position(newElement.$.node);
-        var dimension = this.dimension(newElement.$.node);
-        overlay.style.width = dimension.width + 'px';
-        overlay.style.height = dimension.height + 'px';
-        overlay.style.left = position.left + 'px';
-        overlay.style.top = position.top + 'px';
-        //
-        // Fire Events
-        //
-        if (this.selectedElements.length == 1) {
-            this.fire('edit-SingleElement', newElement);
-        }
-      }
-    },
-
-    /**
-     * Blur (deselect) the active element.
-     *
-     * @method blur
-     * @param  {DOMElement} delHandles The active element to be blured
-     */
-    blur: function(delHandles){
-
-      console.log("Blurry Vision Detected:");
-      if (delHandles) {
-        if (this.dragblur) {
-          this.dragblur();
-        }
-      }
-
-      if(this.selectedElement){
-        this.selectedElement.selected = false;
-        this.selectedElement.classList.remove('drag-resize-focus');
-      }
-
-      this.resizeHandle = null;
-      this.selectedElement = null;
-
-      this.mouse.offset.x = 0;
-      this.mouse.offset.y = 0;
-
-      this.bbox.elmW = 0;
-      this.bbox.elmH = 0;
-      this.bbox.elmX = 0;
-      this.bbox.elmY = 0;
-
-    },
-
-    /**
-     * A convenient function that computes the exact position of an element.
-     *
-     * @method position
-     * @param {DOMElement} element The element to compute.
-     * @return {Object} The current top/left position of an element.
-     */
-    position: function(element){
-      var offset = this.offset(element);
-      return {
-        top: offset.top - 0,
-        left: offset.left - 0
-      };
-    },
-
-    /**
-     * A convenient function that computes the correct offset position of an element.
-     *
-     * @method offset
-     * @param {DOMElement} element The element to compute.
-     * @return {Object} The current top/left offset position of an element.
-     */
-    offset: function(element){
-      var docElem;
-      var o = {
-        top: 0,
-        left: 0
-      };
-      if(element){
-        docElem = element.ownerDocument.documentElement;
-        o = {
-          top: element.offsetTop - docElem.clientTop,
-          left: element.offsetLeft - docElem.clientLeft
-        }
-      }
-      return o;
-    },
-
-    /**
-     * A convenient function that computes the correct dimension of an element.
-     *
-     * @method dimension
-     * @param {DOMElement} element The element to compute.
-     * @return {Object} The current width/height of an element.
-     */
-    dimension: function(element){
-
-      function getDisplayType(element) {
-        return (element.currentStyle || window.getComputedStyle(element, '')).display;
-      }
-
-      var displayType = getDisplayType(element);
-
-      if(displayType === 'inline' || displayType === ''){
-        return element.getBoundingClientRect();
-      }
-      else {
-        return {
-          width: element.clientWidth,
-          height: element.clientHeight
-        }
-      }
-    },
-
-    /**
-     * Changes the stored element dimensions and mouse offset X and Y.
-     *
-     * @method resizeHandleDrag
-     * @param  {Number} diffX The mouse movement amounts for X axe
-     * @param  {Number} diffY The mouse movement amounts for Y axe
-     * @param  {String} direction The resize handles that indicates wich direction is being resized.
-     * @return {Boolean} True if dimensions have been processed.
-     */
-    resizeHandleDrag: function(diffX, diffY, direction,element) {
-      // If the direction is one of the resize handles, resize one or two dimensions.
-      // Bounds checking is the hard bit -- basically for each edge, check that the
-      // element doesn't go under minimum size, and doesn't go beyond its boundary.
-      var computedStyle , iMarginWidth,iMarginHeight, minimumHeight,minimumWidth;
-//        if (element != null) {
-//          computedStyle = window.getComputedStyle(element);
-//          iMarginWidth = this._parseIntDef(computedStyle.marginLeft) + this._parseIntDef(computedStyle.marginRight);
-//          iMarginHeight = this._parseIntDef(computedStyle.marginTop) + this._parseIntDef(computedStyle.marginBottom);
-//          minimumHeight = element.scrollHeight + iMarginHeight;
-//          minimumWidth = element.scrollWidth + iMarginWidth;
-//        } else {
-      minimumWidth = this.minWidth;
-      minimumHeight = this.minHeight;
-//        }
-
-
-      var dY = diffY, dX = diffX, processed = false;
-
-      if(!direction){
-        return false;
-      }
-
-      if (direction.indexOf('t') >= 0) {
-        if (this.bbox.elmH - dY < minimumHeight) {
-          diffY = this.bbox.elmH - minimumHeight;
-          this.mouse.offset.y = dY - diffY;
-        } else if (this.bbox.elmY + dY < this.minTop) {
-          diffY = this.minTop - this.bbox.elmY;
-          this.mouse.offset.y = dY - diffY;
-        }
-        this.bbox.elmY += diffY;
-        this.bbox.elmH -= diffY;
-        processed = true;
-      }
-      if (direction.indexOf('b') >= 0) {
-        if (this.bbox.elmH + dY < minimumHeight) {
-          diffY = minimumHeight - this.bbox.elmH;
-          this.mouse.offset.y = dY - diffY;
-        } else if (this.bbox.elmY + this.bbox.elmH + dY > this.maxTop) {
-          diffY = this.maxTop - this.bbox.elmY - this.bbox.elmH;
-          this.mouse.offset.y = dY - diffY;
-        }
-        this.bbox.elmH += diffY;
-        processed = true;
-      }
-      if (direction.indexOf('l') >= 0) {
-        if (this.bbox.elmW - dX < minimumWidth) {
-          diffX = this.bbox.elmW - minimumWidth;
-          this.mouse.offset.x = dX - diffX;
-        } else if (this.bbox.elmX + dX < this.minLeft) {
-          diffX = this.minLeft - this.bbox.elmX;
-          this.mouse.offset.x = dX - diffX;
-        }
-        this.bbox.elmX += diffX;
-        this.bbox.elmW -= diffX;
-        processed = true;
-      }
-      if (direction.indexOf('r') >= 0) {
-        if (this.bbox.elmW + dX < minimumWidth) {
-          diffX = minimumWidth - this.bbox.elmW;
-          this.mouse.offset.x = dX - diffX;
-        } else if (this.bbox.elmX + this.bbox.elmW + dX > this.maxLeft) {
-          diffX = this.maxLeft - this.bbox.elmX - this.bbox.elmW;
-          this.mouse.offset.x = dX - diffX;
-        }
-        this.bbox.elmW += diffX;
-        processed = true;
-      }
-      return processed;
-    },
-
-    /**
-     * OnDrag event (triggered during the "drag-start" event).
-     *
-     * @method drag
-     * @param  {Event} e The `ondragstart` event.
-     */
-    drag: function(e){
-        if (e.target.dataset.direction) {
-          this.resizeHandle = e.target;
-        } else {
-          this.resizeHandle = null;
-        }
-    },
-    /**
-     * OnDragging event (triggered when dragging an element)
-     *
-     * @method dragging
-     * @param  {Event} dragInfo The Dragging event which contains some useful information.
-     */
-    dragging: function(dragInfo){
-      var ratio = 1 / this.zoomLevel;
-      var ddx = (dragInfo.detail.ddx * ratio) | 0;
-      var ddy = (dragInfo.detail.ddy * ratio) | 0;
-      var position;
-      var i;
-      for ( i = 0; i < this.selectedElements.length; ++i) {
-        var element = this.selectedElements[i].element.$.node;
-        var overlay = this.selectedElements[i].overlay;
-        if (element) {
-          if (this.resizeHandle) {
-            var direction = this.resizeHandle.dataset.direction;
-            position = this.position(element);
-            this.bbox.elmX = position.left;
-            this.bbox.elmY = position.top;
-            var dimension = this.dimension(dragInfo.currentTarget);
-            this.bbox.elmW = dimension.width;
-            this.bbox.elmH = dimension.height;
-            this.resizeHandleDrag(ddx, ddy, direction, element);
-            this._updateOverlayAll(overlay);
-            this._updateOverlayAll(element);
-          }
-          else {
-            position = this.position(element);
-            this.bbox.elmX = position.left + element.clientLeft + ddx;
-            this.bbox.elmY = position.top + element.clientTop + ddy;
-            this._updateOverlay(overlay);
-            this._updateOverlay(element);
-          }
-        }
-      }
-    },
-    aspectRatioChanged: function(){
-      if(this.aspectRatio === true){
-        this.displayHandlers(['br']);
-      }
-      else {
-        this.displayHandlers();
-      }
-    },
-    attached: function() {
-      // Critical to trap mouse movements
-      this.async(function() {
-        this.listen(this.parentNode, 'mousedown', "_doMouseDown");
-        this.listen(this.parentNode, 'mouseup', "_doMouseUp");
-        this.listen(document, 'contextmenu', "_doContextMenu");
-      });
-
-    },
-      _doContextMenu: function(event) {
-          event.stopPropagation();
-          event.preventDefault();
-      },
-    _doMouseUp: function(event) {
-      event.stopPropagation();
-      event.preventDefault();
-      if (event.button == 2) {
-        // Otherwise know as right-button click!
-          contextMenu.showMenu(this.menuData,event.target,"single",event, function(command,node){
-              if (command != null) {
-                  // Create Mock DataPack device id and offset used by Blockly Commands
-                  console.log(command,node);
+      static get properties() {
+          return {
+              /**
+               * Sting for storing class name
+               * of which classes should be listened too
+               *
+               * @attribute parentclass
+               * @type String
+               * @default "default"
+               */
+              parentclass: {
+                  type: String,
+                  value: 'default',
+                  notify: true
+              },
+              /**
+               * Boolean for storing value
+               * for menu state
+               *
+               * @attribute _menuState
+               * @type Boolean
+               * @default "false"
+               */
+              _menuState: {
+                  type: Boolean,
+                  value: 'false',
+                  notify: true
+              },
+              /**
+               * Pass Menu To Build On Fly
+               *
+               * @attribute menu
+               * @type Object
+               * @default none
+               */
+              menu: {
+                  type: Object,
+                  notify: true
               }
-          });
-      }
-    },
-    _doMouseDown: function(event) {
-        var i, element, firstElement;
-        for (i = 0; i < event.path.length; i++) {
-            if (i == 0) {
-                firstElement = event.path[0];
-            }
-            if (event.path[i].Glyph != undefined) {
-                element = event.path[i];
-                break;
-            }
-        }
-        // Check if first Element is drag-resize-handler - if so ignore as object
-        if (firstElement.classList.contains('drag-resize-handlers') ||  firstElement.classList.contains('drag-resize-selected')) {
-            event.stopPropagation();
-            event.preventDefault();
-            return;
-        }
-        // If searching back clicked on a none Sams Object.  Drop.
-        if (element == undefined) {
-            this.selectedElements = [];
-        } else {
-
-          var filteredElements = element.classList.contains('drag-resize-handlers') ||  element.getAttribute('drag-resize') !== null;
-          if(!element.classList.contains('paper-drag-drop')){
-              if(filteredElements){
-                  event.stopPropagation();
-                  event.preventDefault();
-                  if (event.ctrlKey) {
-                      // Add to list
-                      this.focus(element,false);
-                  } else {
-                      // Replace List
-                      this.focus(element,true);
-                  }
-              }
-              else {
-                  // Clear All Selected Elements
-                  this.selectedElements = [];
-              }
-          } else {
-              // Already Selected Thus....
-//              if (event.ctrlKey) {
-//                // Add to list
-//                this.focus(element,false);
-//              } else {
-//                // Forget All and Add One
-//                this.selectedElements = [];
-//                this.focus(element,true);
-//              }
           }
       }
-//      event.stopPropagation();
-//      event.preventDefault();
-    },
-    _generateMenu: function(e) {
-        // Simply to block Menu
-        e.preventDefault();
-//        event.stopPropagation();
-//        event.preventDefault();
-    },
-    _updateOverlay: function(pElement) {
-      pElement.style.left = this.bbox.elmX + 'px';
-      pElement.style.top = this.bbox.elmY + 'px';
-    },
-    _updateOverlayAll: function(pElement) {
-      pElement.style.width = this.bbox.elmW + 'px';
-      pElement.style.height = this.bbox.elmH + 'px';
-      pElement.style.left = this.bbox.elmX + 'px';
-      pElement.style.top = this.bbox.elmY + 'px';
-    },
-    _elementAlreadyAdded: function(newElement) {
-      var i=0;
-      var aData;
-      while (aData = this.selectedElements[i++]) {
-        if (aData.element == newElement) {
-          return aData;
-        }
-      }
-      i = this.push('selectedElements',{name:"paper_drag_selected_" + this.selectedElements.length, element: newElement, overlay: null});
-      return this.selectedElements[i - 1];
-    },
-    _parseIntDef: function(value) {
-      return parseInt(value,10) || 0;
-    },
-    SetPropertyEditor: function(propertyEditor) {
-        if (typeof propertyEditor == 'function') {
-            this.propertyEditor = propertyEditor;
-        }
 
-    },
-    Disable: function() {
-        this.enable = false;
-        this.selectedElements = [];
-        this.blur(true);
-    },
-    Enable: function() {
-        this.enable = true;
+    constructor(mainMenu) {
+          super();
+          this.mainMenu = mainMenu;
     }
-  });
-
+    /**
+     * Method to show the menu
+     * updates class and vibrates on phones
+     *
+     */
+    _toggleMenuOn(){
+      1!==this._menuState&&(this._menuState=1,
+              this.$.contextMenu.classList.add('context-menu--active'));
+      // Error catcher for IE and Edge
+      if (typeof navigator.vibrate === "function") {
+        navigator.vibrate([25])
+      }
+    }
+    /**
+     * Method to hide the menu
+     * updates class
+     *
+     */
+    _toggleMenuOff(){
+      0!==this._menuState&&(this._menuState=0,this.$.contextMenu.classList.remove('context-menu--active'))
+    }
+    /**
+     * Method to work out to place
+     * click event and return boolean
+     *
+     */
+    _clickInsideElement(e,t) {
+        var n = e.path[0];
+        if (n.classList.contains(t)) return n;
+    }
+    /**
+     * Method to listen for clicks
+     * and pass data on to _clickInsideElement
+     * hides menu if click is not allowed
+     *
+     */
+    _clickListener() {
+      var $this = this;
+      document.addEventListener("click",function(e){
+        var t=$this._clickInsideElement(e,'menu-trigger');
+        if(!t)
+          var n=e.which||e.button;
+        1===n&&$this._toggleMenuOff()
+      })
+    }
+    /**
+     * Method to listen for keyup
+     * hides menu is ESC is pressed
+     *
+     */
+    _keyupListener(){
+      var $this = this;
+      window.onkeyup=function(e){
+        27===e.keyCode&&$this._toggleMenuOff()
+      }
+    }
+    /**
+     * Method to listen for page resize
+     * hides menu when actioned
+     *
+     */
+    _resizeListener(){
+      var $this = this;
+      window.onresize=function(){
+        $this._toggleMenuOff()
+      }
+    }
+    /**
+     * Method to get mouse position
+     * and return x and y values
+     *
+     */
+    _getPosition(e){
+        var t,n;
+        return e.pageX||e.pageY?(t=e.pageX,n=e.pageY):
+        (e.clientX||e.clientY)&&(t=e.clientX+document.body.scrollLeft+document.documentElement.scrollLeft,
+                                 n=e.clientY+document.body.scrollTop+document.documentElement.scrollTop),
+        {x:t,y:n}
+    }
+    /**
+     * Method to start all listeners
+     * called when the dom is ready
+     *
+     */
+    _listenerInit() {
+      this._clickListener();
+      this._keyupListener();
+      this._resizeListener();
+    }
+    /**
+     * Method to move the menu
+     * passes information to _getPosition
+     * to get x and y cords, then restyles
+     *
+     */
+    _positionMenu(e){
+        var clickCoords = this._getPosition(e);
+        var menuSelector =  this.$.contextMenu;
+        var menuWidth = menuSelector.offsetWidth + 4;
+        var menuHeight = menuSelector.offsetHeight + 4;
+        var windowWidth = window.innerWidth + (clickCoords.x - e.clientX);
+        var windowHeight = window.innerHeight + (clickCoords.y - e.clientY);
+        var menuCoordsX = menuWidth > windowWidth-clickCoords.x ? clickCoords.x-menuWidth+"px" : clickCoords.x+"px";
+        var menuCoordsY = menuHeight > windowHeight-clickCoords.y ? clickCoords.y-menuHeight+"px" : clickCoords.y+"px";
+        menuSelector.style.left = menuCoordsX;
+        menuSelector.style.top = menuCoordsY;
+    }
+    /**
+     * Method the scripts
+     * domReady for when the dom is connected
+     *
+     */
+    connectedCallback() {
+      this._listenerInit();
+      // Main Menu - Sub Menu a copy is not linked as the main context menu
+      if (contextMenu == undefined) {
+          contextMenu = this;
+      }
+    }
+    showMenu(menuData,e,menu,node,newHandleSelect) {
+      // Build Menu
+      var aMenu;
+      var buildMenu = [];
+      var i = 0;
+      while (aMenu = menuData[i++]) {
+        if (aMenu.type == menu) {
+          if (aMenu.description == "-") {
+          } else {
+            buildMenu.push(aMenu);
+          }
+        }
+      }
+      this.menu = buildMenu;
+      this.menuType = menu;
+      this.ownerNode = e;
+      this.handleSelect = newHandleSelect;
+      this._openContextMenu(node);
+    }
+    _openContextMenu(e) {
+      var $this = this;
+      $this._toggleMenuOn();
+      $this._positionMenu(e);
+    }
+    _onSubMenuSelect(data) {
+        event.stopPropagation();
+        event.preventDefault();
+        if (this.submenu == undefined) {
+            this.submenu = new Lt2ContextMenu(this);
+            this.submenu.setAttribute('id',"lt2submenu");
+            this.parentNode.appendChild(this.submenu);
+        }
+        data.clientX = data.detail.x;
+        data.clientY = data.detail.y;
+        this.submenu.showMenu(data.target.submenu,this,this.menuType,data, this.handleSelect);
+        return false;
+    }
+    _onMenuSelect(data) {
+      event.stopPropagation();
+      event.preventDefault();
+      this._toggleMenuOff();
+      this.handleSelect(data.target.command,this.ownerNode);
+      return false;
+    }
+  }
+  customElements.define(JasContextMenu.is, JasContextMenu);
 </script>
