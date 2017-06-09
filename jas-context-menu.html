@@ -1,6 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../paper-menu/paper-menu.html" />
-<link rel="import" href="../paper-menu/paper-submenu.html" />
+<link rel="import" href="../paper-menu/paper-listbox.html" />
+
 
 <!--
   Polymer element to replace right click functionality.
@@ -45,7 +45,7 @@ Custom property | Description | Default
       }
     </style>
     <div id="node" class="content">
-      <paper-menu id="contextMenu" class="context-menu" allowOutsideScroll selected="-1">
+      <paper-listbox id="contextMenu" class="context-menu" allowOutsideScroll selected="-1">
         <template id="resultList" is="dom-repeat" items="{{menu}}" as="m">
           <template is="dom-if" if="[[m.submenu]]">
               <paper-item class="menu-trigger" role="menuitem" submenu="[[m.submenu]]" on-tap="_onSubMenuSelect">[[m.description]]</paper-item>
@@ -54,7 +54,7 @@ Custom property | Description | Default
             <paper-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect">[[m.description]]</paper-item>
           </template>
         </template>
-      </paper-menu>
+      </paper-listbox>
     </div>
   </template>
 </dom-module>
