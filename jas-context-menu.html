@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-listbox/paper-listbox.html" />
+<link rel="import" href="../paper-item/paper-item.html" />
 
 
 <!--
@@ -223,6 +224,7 @@ Custom property | Description | Default
      *
      */
     connectedCallback() {
+        super.connectedCallback();
       this._listenerInit();
       // Main Menu - Sub Menu a copy is not linked as the main context menu
       if (contextMenu == undefined) {
