@@ -1,6 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-listbox/paper-listbox.html" />
 <link rel="import" href="../paper-item/paper-item.html" />
+<link rel="import" href="../paper-item/paper-icon-item.html" />
+<link rel="import" href="../iron-icon/iron-icon.html"/>
 
 
 <!--
@@ -36,6 +38,14 @@ Custom property | Description | Default
       .context-menu--active {
         display: block;
       }
+      paper-icon-item {
+        cursor: pointer;
+        color: var(--app-primary-color, #0066aa);
+        --iron-icon-width: 32px;
+      }
+      paper-icon-item:hover { background-color: var(--app-primary-color, #0066aa);
+        color: var(--app-primary-text-color, #fff);
+      }
       paper-item {
         cursor: pointer;
         color: var(--app-primary-color, #0066aa);
@@ -44,12 +54,14 @@ Custom property | Description | Default
         background-color: var(--app-primary-color, #0066aa);
         color: var(--app-primary-text-color, #fff);
       }
+
+
     </style>
     <div id="node" class="content">
       <paper-listbox id="contextMenu" class="context-menu" allowOutsideScroll selected="-1">
         <template id="resultList" is="dom-repeat" items="{{menu}}" as="m">
           <template is="dom-if" if="[[m.submenu]]">
-              <paper-item class="menu-trigger" role="menuitem" submenu="[[m.submenu]]" on-tap="_onSubMenuSelect">[[m.description]]</paper-item>
+              <paper-icon-item class="menu-trigger" role="menuitem" submenu="[[m.submenu]]" on-tap="_onSubMenuSelect"><iron-icon icon="add-circle-outline" slot="item-icon"></iron-icon>[[m.description]]</paper-icon-item>
           </template>
           <template is="dom-if" if="[[!m.submenu]]">
             <paper-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect">[[m.description]]</paper-item>
