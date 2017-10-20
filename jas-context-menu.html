@@ -3,8 +3,7 @@
 <link rel="import" href="../paper-item/paper-item.html" />
 <link rel="import" href="../paper-item/paper-icon-item.html" />
 <link rel="import" href="../iron-icon/iron-icon.html"/>
-
-
+<link rel="import" href="../iron-iconset-svg/iron-iconset-svg.html">
 <!--
   Polymer element to replace right click functionality.
 
@@ -22,7 +21,6 @@ Custom property | Description | Default
   @element l2t-context-menu
   @demo demo/index.html
 -->
-
 <dom-module id="jas-context-menu">
   <template>
     <style>
@@ -41,7 +39,6 @@ Custom property | Description | Default
       paper-icon-item {
         cursor: pointer;
         color: var(--app-primary-color, #0066aa);
-        --iron-icon-width: 32px;
       }
       paper-icon-item:hover { background-color: var(--app-primary-color, #0066aa);
         color: var(--app-primary-text-color, #fff);
@@ -57,11 +54,20 @@ Custom property | Description | Default
 
 
     </style>
+    <iron-iconset-svg name="contextmenu" size="24">
+      <svg><defs>
+        <g id="arrow-drop-down"><path d="M7 10l5 5 5-5z"/></g>
+      </defs></svg>
+    </iron-iconset-svg>
+
     <div id="node" class="content">
       <paper-listbox id="contextMenu" class="context-menu" allowOutsideScroll selected="-1">
         <template id="resultList" is="dom-repeat" items="{{menu}}" as="m">
           <template is="dom-if" if="[[m.submenu]]">
-              <paper-icon-item class="menu-trigger" role="menuitem" submenu="[[m.submenu]]" on-tap="_onSubMenuSelect"><iron-icon icon="add-circle-outline" slot="item-icon"></iron-icon>[[m.description]]</paper-icon-item>
+              <paper-icon-item class="menu-trigger" role="menuitem" submenu="[[m.submenu]]" on-tap="_onSubMenuSelect">
+                <iron-icon class="menu-trigger" on-tap="_onSubMenuSelect" submenu="[[m.submenu]]" icon="contextmenu:arrow-drop-down" slot="item-icon">
+                </iron-icon>[[m.description]]
+              </paper-icon-item>
           </template>
           <template is="dom-if" if="[[!m.submenu]]">
             <paper-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect">[[m.description]]</paper-item>
