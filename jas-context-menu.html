@@ -1,930 +1,290 @@
-<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html" />
+<link rel="import" href="../paper-item/paper-item.html" />
+<link rel="import" href="../paper-item/paper-icon-item.html" />
+<link rel="import" href="../iron-icon/iron-icon.html"/>
+<link rel="import" href="../iron-iconset-svg/iron-iconset-svg.html">
 <!--
-Copyright (c) 2014 Wassim Chegham. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-
-Icons
-  Many Great Icons are provided by the Google Polymer Team - Just embedded for quick download. Under BSD style license
-  See - https://github.com/PolymerElements/iron-icons/blob/master/iron-icons.html
-  Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+  Polymer element to replace right click functionality.
+  ### Styling
+    
+The following custom properties are available for styling:
+Custom property | Description | Default
+----------------|-------------|----------
+`--app-primary-color` | Background color of the menu when focused. | `#fff`
+`--context-text-color` | Text color within the menu. | `#333`
+`--context-link-text-color` | Text color and on hover background color for links<br>For text within 'A' tags. | `#0066aa`
+`--context-horizontal-rule-color` | Color of 'HR' tags. | `#bcbcbc`
+  @element l2t-context-menu
+  @demo demo/index.html
 -->
-
-<!--
-Element that enables any DOM element to be draggable and resizable.
-
-##### Example
-
-    <drag-resize></drag-resize>
-
-@element paper-drag-drop
-@blurb Element that enables any DOM element to be draggable and resizable.
-@status beta
-@homepage https://github.io/manekinekko/drag-resize
-@demo demo/index.html
--->
-<dom-module id="paper-drag-drop">
+<dom-module id="jas-context-menu">
   <template>
     <style>
-    .drag-elastic-band {
-      border: 1px dotted rgb(8, 253, 25);
-      display: none;
-      position: absolute;
-    }
-    .drag-resize-selected {
-      border: 1px dotted rgb(0, 150, 253);
-      cursor: move;
-      display: block;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      z-index: 999;
-      transform: translate3d(0, 0, 0);
-      -webkit-transform: translate3d(0, 0, 0);
-    }
-    .drag-resize-handlers {
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      font-size: 1px;
-      background: rgb(0, 150, 253);
-      -webkit-transition: all 0.1s linear;
-      transition: all 0.1s linear;
-      opacity: 1;
-    }
-    :host(.drag-resize-selected) .drag-resize-handlers {
-      opacity: 1;
-    }
-
-    .drag-resize-handlers:hover {
-      transform: scale(1.6); /*chrome*/
-      -webkit-transform: scale(1.6); /*nodewebkit*/
-    }
-
-    /*
-     Individual corner classes - required for resize support.
-    */
-    .drag-resize-handlers[data-direction="tl"] {
-      top: -5px;
-      left: -5px;
-      cursor: nw-resize;
-    }
-    .drag-resize-handlers[data-direction="tm"] {
-      top: -5px;
-      left: 50%;
-      margin-left: -5px;
-      cursor: n-resize;
-    }
-    .drag-resize-handlers[data-direction="tr"] {
-      top: -5px;
-      right: -5px;
-      cursor: ne-resize;
-    }
-    .drag-resize-handlers[data-direction="ml"] {
-      top: 50%;
-      margin-top: -5px;
-      left: -5px;
-      cursor: w-resize;
-    }
-    .drag-resize-handlers[data-direction="mr"] {
-      top: 50%;
-      margin-top: -5px;
-      right: -5px;
-      cursor: e-resize;
-    }
-    .drag-resize-handlers[data-direction="bl"] {
-      bottom: -5px;
-      left: -5px;
-      cursor: sw-resize;
-    }
-    .drag-resize-handlers[data-direction="bm"] {
-      bottom: -5px;
-      left: 50%;
-      margin-left: -5px;
-      cursor: s-resize;
-    }
-    .drag-resize-handlers[data-direction="br"] {
-      bottom: -5px;
-      right: -5px;
-      cursor: se-resize;
-    }
-    .hidden {
-      display: none;
-    }
-  </style>
-    <div id="drag-elastic-band" class="drag-elastic-band"></div>
-    <iron-iconset-svg name="paperdragdrop" size="24">
+      .context-menu {
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        padding: 6px;
+        background-color: var(--context-background-color, #fff);
+        -moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.4);
+        box-shadow:0 2px 5px 0 rgba(0,0,0,.4);
+      }
+      .context-menu--active {
+        display: block;
+      }
+      paper-icon-item {
+        cursor: pointer;
+        color: var(--app-primary-color, #0066aa);
+      }
+      paper-icon-item:hover { background-color: var(--app-primary-color, #0066aa);
+        color: var(--app-primary-text-color, #fff);
+      }
+      paper-item {
+        cursor: pointer;
+        color: var(--app-primary-color, #0066aa);
+      }
+      paper-item:hover {
+        background-color: var(--app-primary-color, #0066aa);
+        color: var(--app-primary-text-color, #fff);
+      }
+    </style>
+    <iron-iconset-svg name="contextmenu" size="24">
       <svg><defs>
-        <g id="content-copy"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></g>
-        <g id="content-cut"><path d="M9.64 7.64c.23-.5.36-1.05.36-1.64 0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64zM6 8c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm0 12c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zM19 3l-6 6 2 2 7-7V3z"/></g>
-        <g id="content-paste"><path d="M19 2h-4.18C14.4.84 13.3 0 12 0c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 18H5V4h2v3h10V4h2v16z"/></g>
-        <g id="vertical-align-bottom"><path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z"/></g>
-        <g id="vertical-align-center"><path d="M8 19h3v4h2v-4h3l-4-4-4 4zm8-14h-3V1h-2v4H8l4 4 4-4zM4 11v2h16v-2H4z"/></g>
-        <g id="vertical-align-top"><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></g>
-        <g id="undo"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></g>
-        <g id="delete"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></g>
+        <g id="arrow-drop-down"><path d="M7 10l5 5 5-5z"/></g>
       </defs></svg>
     </iron-iconset-svg>
-    <div id="resizable_handlers">
-      <template id="selectedelements" is="dom-repeat" items="{{selectedElements}}">
-        <div id="{{item.name}}" class="drag-resize-selected" on-track="_eventOnTrack" >
-          <div class="drag-resize-handlers" data-direction="tl"></div>
-          <div class="drag-resize-handlers" data-direction="tm"></div>
-          <div class="drag-resize-handlers" data-direction="tr"></div>
-          <div class="drag-resize-handlers" data-direction="mr"></div>
-          <div class="drag-resize-handlers" data-direction="ml"></div>
-          <div class="drag-resize-handlers" data-direction="bl"></div>
-          <div class="drag-resize-handlers" data-direction="bm"></div>
-          <div class="drag-resize-handlers" data-direction="br"></div>
-        </div>
-      </template>
+
+    <div id="node" class="content">
+      <paper-listbox id="contextMenu" class="context-menu" allowOutsideScroll selected="-1">
+        <template id="resultList" is="dom-repeat" items="{{menu}}" as="m">
+          <template is="dom-if" if="[[m.submenu]]">
+              <paper-icon-item class="menu-trigger" role="menuitem" submenu="[[m.submenu]]" on-tap="_onSubMenuSelect">
+                <iron-icon class="menu-trigger" on-tap="_onSubMenuSelect" submenu="[[m.submenu]]" icon="contextmenu:arrow-drop-down" slot="item-icon">
+                </iron-icon>[[m.description]]
+              </paper-icon-item>
+          </template>
+          <template is="dom-if" if="[[!m.submenu]]">
+            <paper-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect">[[m.description]]</paper-item>
+          </template>
+        </template>
+      </paper-listbox>
     </div>
   </template>
 </dom-module>
-<!--
-
--->
 <script>
-
-    class PaperDragDrop extends Polymer.GestureEventListeners(Polymer.Element) {
-        static get is() { return 'paper-drag-drop'; }
-        static get properties() { return {
-                    selectedElements: {
-                        type: Array,
-                        notify: true,
-                        value: []
-                    },
-                    aspectRatio: {
-                        /**
-                         * `aspectRatio` is a property that preserves the aspectRatio.
-                         *
-                         * @property aspectRatio
-                         * @type bool
-                         * @default false
-                         */
-                        type: Boolean,
-                        value: false
-                    },
-                    /**
-                     * `minWidth` is the minimum pixel width of the element.
-                     *
-                     * @property minWidth
-                     * @type number
-                     * @default 30
-                     */
-                    minWidth: {
-                        type: Number,
-                        value: 10
-                    },
-                    /**
-                     * `minHeight` is the minimum pixel height of the element.
-                     *
-                     * @property minHeight
-                     * @type number
-                     * @default 30
-                     */
-                    minHeight: {
-                        type: Number,
-                        value: 10
-                    },
-                    /**
-                     * `minLeft` is the minimum left position, in pixels.
-                     *
-                     * @property minLeft
-                     * @type number
-                     * @default -9999
-                     */
-                    minLeft: {
-                        type: Number,
-                        value: -9999
-                    },
-
-                    /**
-                     * `maxLeft` is the maximum left position, in pixels.
-                     *
-                     * @property maxLeft
-                     * @type number
-                     * @default 9999
-                     */
-                    maxLeft: {
-                        type: Number,
-                        value: 9999
-                    },
-
-                    /**
-                     * `minTop` is the minimum top position, in pixels.
-                     *
-                     * @property minTop
-                     * @type number
-                     * @default -9999
-                     */
-                    minTop: {
-                        type: Number,
-                        value: -9999
-                    },
-
-                    /**
-                     * `maxTop` is the minimum top position, in pixels.
-                     *
-                     * @property maxTop
-                     * @type number
-                     * @default 9999
-                     */
-                    maxTop: {
-                        type: Number,
-                        value: 9999
-                    },
-
-                    /**
-                     * `zoomRatio` is the zoom ratio used to scale the element.
-                     *
-                     * @property zoomRatio
-                     * @type number
-                     * @default 1
-                     */
-                    zoomRatio: {
-                        type: Number,
-                        value: 1
-                    },
-
-                    /**
-                     * `zoomLevel` is the original zoom level.
-                     *
-                     * @property zoomLevel
-                     * @type number
-                     * @default 1
-                     */
-                    zoomLevel: {
-                        type: Number,
-                        value: 1
-                    },
-                    class: {
-                        type: String,
-                        value: "drag-resize",
-                        reflectToAttribute: true
-                    }
-                }
-        }
-        constructor() {
-            super();
-            this.selectedElement = null;
-            this.resizeHandle = null;
-            this.enable = true;
-            this.bbox = {
-                elmX: 0,
-                elmY: 0,
-                elmH: 0,
-                elmW: 0
-            };
-            this.mouse = {
-                x: 0,
-                y: 0,
-                last: {
-                    x: 0,
-                    y: 0
-                },
-                offset: {
-                    x: 0,
-                    y: 0
-                }
-            };
-            // Can Be Automated this....
-            this.menuAddObjects = [
-              {type: "add", description: "Add Label", command: "add-label"},
-              {type: "add", description: "Add Image", command: "add-image"},
-              {type: "add", description: "Add Button", command: "add-button"}
-            ];
-
-            this.menuData = [
-                {
-                    type: "align", description: "Align", command: "",
-                    submenu: [
-                        {type: "align", description: "Left", command: "edit-align-left", icon: "paperdragdrop:"},
-                        {type: "align", description: "Right", command: "edit-align-right",icon: "paperdragdrop:content-copy"},
-                        {type: "align", description: "Top", command: "edit-align-top",icon: "paperdragdrop:vertical-align-top"},
-                        {type: "align", description: "Bottom", command: "edit-align-bottom",icon: "paperdragdrop:vertical-align-bottom"},
-                        {type: "align", description: "Vertical Center", command: "edit-align-vertical-center",icon: "paperdragdrop:vertical-align-center"}
-                    ]
-                },
-                {
-                    type: "align", description: "Resize", command: "", icon:"arrow-drop-down",
-                    submenu: [
-                        {type: "align", description: "Grow to Largest Width", command: "edit-resize-width-grow"},
-                        {type: "align", description: "Shrink to Smallest Width", command: "align-resize-width-shrink"},
-                        {type: "align", description: "Grow to Largest Height", command: "edit-resize-height-grow"},
-                        {type: "align", description: "Shrink to Smallest Height", command: "align-resize-height-shrink"}
-
-                    ]
-                },
-                {type: "add", description: "Add", command: "edit-add",submenu: this.menuAddObjects},
-                {type: "add", description: "-", command: ""},
-                {type: "clipboard", description: "Copy", command: "edit-copy", icon: "paperdragdrop:content-copy"},
-                {type: "clipboard", description: "Cut", command: "edit-cut",icon: "paperdragdrop:content-cut"},
-                {type: "clipboard-paste", description: "Paste", command: "edit-paste", icon: "paperdragdrop:content-paste"},
-                {type: "undo", description: "Undo", command: "edit-UndoStep",icon: "paperdragdrop:undo"},
-                {type: "delete", description: "-", command: ""},
-                {type: "delete", description: "Delete", command: "edit-delete",icon: "paperdragdrop:delete"}
-            ];
-            this._Bind_EventMouseDown = this._EventMouseDown.bind(this);
-            this._Bind_EventMouseUp = this._EventMouseUp.bind(this);
-            this._Bind_EventContextMenu = this._EventContextMenu.bind(this);
-            this._Bind_EventRefreshOverlays = this._EventRefreshOverlays.bind(this);
-        }
-        connectedCallback() {
-            super.connectedCallback();
-            // Critical to trap mouse movements
-            document.addEventListener('mousedown', this._Bind_EventMouseDown);
-            document.addEventListener('mouseup', this._Bind_EventMouseUp);
-            document.addEventListener('contextmenu', this._Bind_EventContextMenu);
-            document.addEventListener('edit-RefreshOverlays', this._Bind_EventRefreshOverlays);
-        }
-        disconnectedCallback() {
-            super.disconnectedCallback();
-            document.removeEventListener('mousedown', this._Bind_EventMouseDown);
-            document.removeEventListener('mouseup', this._Bind_EventMouseUp);
-            document.removeEventListener('contextmenu', this._Bind_EventContextMenu);
-            document.removeEventListener('edit-RefreshOverlays', this._Bind_EventRefreshOverlays);
-        }
-      /**
-       * Toggle the debug info tooltip
-       *
-       * @method toggleDebugInfo
-       */
-      toggleDebugInfo(){
-        this.$.debug_info.classList.toggle('hidden');
-      }
-
-      /**
-       * This method is used to show all or a subset of the resize handlers.
-       *
-       * @method displayHandlers
-       * @param {Array} filters An array of the handlers to show. If the array is empty or not provided, then all the handlers are shown.
-       */
-      displayHandlers(filters){
-        var handlersContainer = this.$.resizable_handlers;
-        var handlers = [].slice.call(handlersContainer.querySelectorAll('[data-direction]'));
-        if(filters && filters.length>0){
-          // first, hide all
-          handlers.forEach(function(handler, index, self){
-            handler.style.visibility = 'hidden';
-          });
-          // show filtered only
-          filters.map(function(filter, index, self){
-            var dom = handlersContainer.querySelector('[data-direction="'+filter+'"]');
-            if(dom){
-              dom.style.visibility = 'visible';
-            }
-            return dom;
-          });
-        }
-        else {
-          // show all
-          handlers.forEach(function(handler, index, self){
-            handler.style.visibility = 'visible';
-          });
-        }
-      }
-      /**
-       * The `ontap` handler.
-       *
-       * @method ontap
-       * @param  {Event} event The `ontap` event.
-       */
-      ontap(event){
-        event.stopPropagation();
-        event.preventDefault();
-      }
-
-        //
-        // Internal On Track Event
-        //
-       _eventOnTrack(e) {
-        switch(e.detail.state) {
-          case 'start':
-            this.drag(e);
-            break;
-          case 'track':
-            this.dragging(e);
-            break;
-          case 'end':
-            this.finishedDragging(e);
-            break;
-        }
-        event.stopPropagation();
-        event.preventDefault();
-      }
-      /**
-       * Focus (select) the active element.
-       *
-       * @method focus
-       * @param  {DOMElement} newElement The element to be selected.
-       */
-      focus(newElement, replace){
-        // Should only be called when new item selected.  Otherwise something has gone wrong.
-        if (replace == true) {
-          // Clear Out Result
-          this.selectedElements = [];
-        }
-        if ( this.enable && newElement && !newElement.classList.contains('drag-resize-selected') ) {
-          // Add With Index Name - Use Polymer so it can see the request
-          var elementObj = this._elementAlreadyAdded(newElement);
-          // Force immediate render.  No performance issues as only human speed of clicking
-          this.$.selectedelements.render();
-          // Not the most elegant but...grab overlay
-          var overlay = this.shadowRoot.querySelector('#'+elementObj.name);
-          // Hook
-          elementObj.overlay = overlay;
-          var position = this.position(newElement.$.node);
-          var dimension = this.dimension(newElement.$.node);
-          overlay.style.width = dimension.width + 'px';
-          overlay.style.height = dimension.height + 'px';
-          overlay.style.left = position.left + 'px';
-          overlay.style.top = position.top + 'px';
-          //
-          // Fire Events - Only works with 1 for editing.   Merging can come later if needed
-          //
-          if (this.selectedElements.length == 1) {
-              this.fire('edit-SingleElement', this.selectedElements[0].element);
-          } else {
-              // Not
-              this.fire('edit-MultiElement', this.selectedElements);
-          }
-        }
-      }
-
-      /**
-       * Blur (deselect) the active element.
-       *
-       * @method blur
-       * @param  {DOMElement} delHandles The active element to be blured
-       */
-      blur(delHandles){
-
-        console.log("Blurry Vision Detected:");
-        if (delHandles) {
-          if (this.dragblur) {
-            this.dragblur();
-          }
-        }
-
-        if(this.selectedElement){
-          this.selectedElement.selected = false;
-          this.selectedElement.classList.remove('drag-resize-focus');
-        }
-
-        this.fire('edit-Cancel', null);
-
-        this.resizeHandle = null;
-        this.selectedElement = null;
-
-        this.mouse.offset.x = 0;
-        this.mouse.offset.y = 0;
-
-        this.bbox.elmW = 0;
-        this.bbox.elmH = 0;
-        this.bbox.elmX = 0;
-        this.bbox.elmY = 0;
-
-      }
-
-      /**
-       * A convenient function that computes the exact position of an element.
-       *
-       * @method position
-       * @param {DOMElement} element The element to compute.
-       * @return {Object} The current top/left position of an element.
-       */
-      position(element){
-        var offset = this.offset(element);
-        return {
-          top: offset.top - 0,
-          left: offset.left - 0
-        };
-      }
-      /**
-       * A convenient function that computes the correct offset position of an element.
-       *
-       * @method offset
-       * @param {DOMElement} element The element to compute.
-       * @return {Object} The current top/left offset position of an element.
-       */
-      offset(element){
-        var docElem;
-        var o = {
-          top: 0,
-          left: 0
-        };
-        if(element){
-          docElem = element.ownerDocument.documentElement;
-          o = {
-            top: element.offsetTop - docElem.clientTop,
-            left: element.offsetLeft - docElem.clientLeft
-          }
-        }
-        return o;
-      }
-
-      /**
-       * A convenient function that computes the correct dimension of an element.
-       *
-       * @method dimension
-       * @param {DOMElement} element The element to compute.
-       * @return {Object} The current width/height of an element.
-       */
-      dimension(element){
-          function getDisplayType(element) {
-          return (element.currentStyle || window.getComputedStyle(element, '')).display;
-        }
-
-        var displayType = getDisplayType(element);
-
-        if(displayType === 'inline' || displayType === ''){
-          return element.getBoundingClientRect();
-        }
-        else {
+  var contextMenu;
+  class JasContextMenu extends Polymer.Element {
+      static get is() { return 'jas-context-menu'; }
+      static get properties() {
           return {
-            width: element.clientWidth,
-            height: element.clientHeight
+              /**
+               * Sting for storing class name
+               * of which classes should be listened too
+               *
+               * @attribute parentclass
+               * @type String
+               * @default "default"
+               */
+              parentclass: {
+                  type: String,
+                  value: 'default',
+                  notify: true
+              },
+              /**
+               * Boolean for storing value
+               * for menu state
+               *
+               * @attribute _menuState
+               * @type Boolean
+               * @default "false"
+               */
+              _menuState: {
+                  type: Boolean,
+                  value: 'false',
+                  notify: true
+              },
+              /**
+               * Pass Menu To Build On Fly
+               *
+               * @attribute menu
+               * @type Object
+               * @default none
+               */
+              menu: {
+                  type: Object,
+                  notify: true
+              }
           }
-        }
       }
-
-      /**
-       * Changes the stored element dimensions and mouse offset X and Y.
-       *
-       * @method resizeHandleDrag
-       * @param  {Number} diffX The mouse movement amounts for X axe
-       * @param  {Number} diffY The mouse movement amounts for Y axe
-       * @param  {String} direction The resize handles that indicates wich direction is being resized.
-       * @return {Boolean} True if dimensions have been processed.
-       */
-      resizeHandleDrag(diffX, diffY, direction,element) {
-        // If the direction is one of the resize handles, resize one or two dimensions.
-        // Bounds checking is the hard bit -- basically for each edge, check that the
-        // element doesn't go under minimum size, and doesn't go beyond its boundary.
-        var computedStyle , iMarginWidth,iMarginHeight, minimumHeight,minimumWidth;
-  //        if (element != null) {
-  //          computedStyle = window.getComputedStyle(element);
-  //          iMarginWidth = this._parseIntDef(computedStyle.marginLeft) + this._parseIntDef(computedStyle.marginRight);
-  //          iMarginHeight = this._parseIntDef(computedStyle.marginTop) + this._parseIntDef(computedStyle.marginBottom);
-  //          minimumHeight = element.scrollHeight + iMarginHeight;
-  //          minimumWidth = element.scrollWidth + iMarginWidth;
-  //        } else {
-        minimumWidth = this.minWidth;
-        minimumHeight = this.minHeight;
-  //        }
-
-
-        var dY = diffY, dX = diffX, processed = false;
-
-        if(!direction){
-          return false;
-        }
-
-        if (direction.indexOf('t') >= 0) {
-          if (this.bbox.elmH - dY < minimumHeight) {
-            diffY = this.bbox.elmH - minimumHeight;
-            this.mouse.offset.y = dY - diffY;
-          } else if (this.bbox.elmY + dY < this.minTop) {
-            diffY = this.minTop - this.bbox.elmY;
-            this.mouse.offset.y = dY - diffY;
-          }
-          this.bbox.elmY += diffY;
-          this.bbox.elmH -= diffY;
-          processed = true;
-        }
-        if (direction.indexOf('b') >= 0) {
-          if (this.bbox.elmH + dY < minimumHeight) {
-            diffY = minimumHeight - this.bbox.elmH;
-            this.mouse.offset.y = dY - diffY;
-          } else if (this.bbox.elmY + this.bbox.elmH + dY > this.maxTop) {
-            diffY = this.maxTop - this.bbox.elmY - this.bbox.elmH;
-            this.mouse.offset.y = dY - diffY;
-          }
-          this.bbox.elmH += diffY;
-          processed = true;
-        }
-        if (direction.indexOf('l') >= 0) {
-          if (this.bbox.elmW - dX < minimumWidth) {
-            diffX = this.bbox.elmW - minimumWidth;
-            this.mouse.offset.x = dX - diffX;
-          } else if (this.bbox.elmX + dX < this.minLeft) {
-            diffX = this.minLeft - this.bbox.elmX;
-            this.mouse.offset.x = dX - diffX;
-          }
-          this.bbox.elmX += diffX;
-          this.bbox.elmW -= diffX;
-          processed = true;
-        }
-        if (direction.indexOf('r') >= 0) {
-          if (this.bbox.elmW + dX < minimumWidth) {
-            diffX = minimumWidth - this.bbox.elmW;
-            this.mouse.offset.x = dX - diffX;
-          } else if (this.bbox.elmX + this.bbox.elmW + dX > this.maxLeft) {
-            diffX = this.maxLeft - this.bbox.elmX - this.bbox.elmW;
-            this.mouse.offset.x = dX - diffX;
-          }
-          this.bbox.elmW += diffX;
-          processed = true;
-        }
-        return processed;
+    constructor(mainMenu) {
+          super();
+          this.mainMenu = mainMenu;
+    }
+    /**
+     * Method to show the menu
+     * updates class and vibrates on phones
+     *
+     */
+    _toggleMenuOn(){
+      1!==this._menuState&&(this._menuState=1,
+              this.$.contextMenu.classList.add('context-menu--active'));
+      // Error catcher for IE and Edge
+      if (typeof navigator.vibrate === "function") {
+        navigator.vibrate([25])
       }
-      /**
-       * OnDrag event (triggered during the "drag-start" event).
-       *
-       * @method drag
-       * @param  {Event} e The `ondragstart` event.
-       */
-      drag(e){
-          if (e.target.dataset.direction) {
-            this.resizeHandle = e.target;
+    }
+    /**
+     * Method to hide the menu
+     * updates class
+     *
+     */
+    _toggleMenuOff(){
+      0!==this._menuState&&(this._menuState=0,this.$.contextMenu.classList.remove('context-menu--active'))
+    }
+    /**
+     * Method to work out to place
+     * click event and return boolean
+     *
+     */
+    _clickInsideElement(e,t) {
+        var n = e.path[0];
+        if (n.classList.contains(t)) return n;
+    }
+    /**
+     * Method to listen for clicks
+     * and pass data on to _clickInsideElement
+     * hides menu if click is not allowed
+     *
+     */
+    _clickListener() {
+      var $this = this;
+      document.addEventListener("click",function(e){
+        var t=$this._clickInsideElement(e,'menu-trigger');
+        if(!t)
+          var n=e.which||e.button;
+        1===n&&$this._toggleMenuOff()
+      })
+    }
+    /**
+     * Method to listen for keyup
+     * hides menu is ESC is pressed
+     *
+     */
+    _keyupListener(){
+      var $this = this;
+      window.onkeyup=function(e){
+        27===e.keyCode&&$this._toggleMenuOff()
+      }
+    }
+    /**
+     * Method to listen for page resize
+     * hides menu when actioned
+     *
+     */
+    _resizeListener(){
+      var $this = this;
+      window.onresize=function(){
+        $this._toggleMenuOff()
+      }
+    }
+    /**
+     * Method to get mouse position
+     * and return x and y values
+     *
+     */
+    _getPosition(e){
+        var t,n;
+        return e.pageX||e.pageY?(t=e.pageX,n=e.pageY):
+        (e.clientX||e.clientY)&&(t=e.clientX+document.body.scrollLeft+document.documentElement.scrollLeft,
+                                 n=e.clientY+document.body.scrollTop+document.documentElement.scrollTop),
+        {x:t,y:n}
+    }
+    /**
+     * Method to start all listeners
+     * called when the dom is ready
+     *
+     */
+    _listenerInit() {
+      this._clickListener();
+      this._keyupListener();
+      this._resizeListener();
+    }
+    /**
+     * Method to move the menu
+     * passes information to _getPosition
+     * to get x and y cords, then restyles
+     *
+     */
+    _positionMenu(e){
+        var clickCoords = this._getPosition(e);
+        var menuSelector =  this.$.contextMenu;
+        var menuWidth = menuSelector.offsetWidth + 4;
+        var menuHeight = menuSelector.offsetHeight + 4;
+        var windowWidth = window.innerWidth + (clickCoords.x - e.clientX);
+        var windowHeight = window.innerHeight + (clickCoords.y - e.clientY);
+        var menuCoordsX = menuWidth > windowWidth-clickCoords.x ? clickCoords.x-menuWidth+"px" : clickCoords.x+"px";
+        var menuCoordsY = menuHeight > windowHeight-clickCoords.y ? clickCoords.y-menuHeight+"px" : clickCoords.y+"px";
+        menuSelector.style.left = menuCoordsX;
+        menuSelector.style.top = menuCoordsY;
+    }
+    /**
+     * Method the scripts
+     * domReady for when the dom is connected
+     *
+     */
+    connectedCallback() {
+        super.connectedCallback();
+      this._listenerInit();
+      // Main Menu - Sub Menu a copy is not linked as the main context menu
+      if (contextMenu == undefined) {
+          contextMenu = this;
+      }
+    }
+    showMenu(menuData,e,menu,node,newHandleSelect) {
+      // Build Menu
+      var aMenu;
+      var buildMenu = [];
+      var i = 0;
+      while (aMenu = menuData[i++]) {
+        if (aMenu.type == menu) {
+          if (aMenu.description == "-") {
           } else {
-            this.resizeHandle = null;
-          }
-      }
-      /**
-       * OnDragging event (triggered when dragging an element)
-       *
-       * @method dragging
-       * @param  {Event} dragInfo The Dragging event which contains some useful information.
-       */
-      dragging(dragInfo){
-        var ratio = 1 / this.zoomLevel;
-        var ddx = (dragInfo.detail.ddx * ratio) | 0;
-        var ddy = (dragInfo.detail.ddy * ratio) | 0;
-        var position;
-        var i;
-        for ( i = 0; i < this.selectedElements.length; ++i) {
-          var element = this.selectedElements[i].element.$.node;
-          var overlay = this.selectedElements[i].overlay;
-          if (element) {
-            if (this.resizeHandle) {
-              var direction = this.resizeHandle.dataset.direction;
-              position = this.position(element);
-              this.bbox.elmX = position.left;
-              this.bbox.elmY = position.top;
-              var dimension = this.dimension(dragInfo.currentTarget);
-              this.bbox.elmW = dimension.width;
-              this.bbox.elmH = dimension.height;
-              this.resizeHandleDrag(ddx, ddy, direction, element);
-              this._updateOverlayAll(overlay);
-              this._updateOverlayAll(element);
-              this._updateGlyphAll(this.selectedElements[i].element);
-            }
-            else {
-              position = this.position(element);
-              this.bbox.elmX = position.left + element.clientLeft + ddx;
-              this.bbox.elmY = position.top + element.clientTop + ddy;
-              this._updateOverlay(overlay);
-              this._updateOverlay(element);
-              this._updateGlyph(this.selectedElements[i].element);
-            }
+            buildMenu.push(aMenu);
           }
         }
-        //
-        // Fire Events
-        //
-        if (this.selectedElements.length == 1) {
-            this.fire('edit-MoveResizeSingleElement', this.selectedElements[0].element);
-        } else {
-            this.fire('edit-MoveResizeMultiElement', this.selectedElements);
+      }
+      this.menu = buildMenu;
+      this.menuType = menu;
+      this.ownerNode = e;
+      this.handleSelect = newHandleSelect;
+      this._openContextMenu(node);
+    }
+    _openContextMenu(e) {
+      var $this = this;
+      $this._toggleMenuOn();
+      $this._positionMenu(e);
+    }
+    _onSubMenuSelect(data) {
+        event.stopPropagation();
+        event.preventDefault();
+        if (this.submenu == undefined) {
+            this.submenu = new JasContextMenu(this);
+            this.submenu.setAttribute('id',"jassubmenu");
+            this.parentNode.appendChild(this.submenu);
         }
-      }
-
-      finishedDragging(dragInfo) {
-            //
-            // Fire Events
-            //
-            if (this.selectedElements.length == 1) {
-                this.fire('edit-MoveResizeSingleElement', this.selectedElements[0].element, "done");
-            } else {
-                this.fire('edit-MoveResizeMultiElement', this.selectedElements, "done");
-            }
-      }
-
-      aspectRatioChanged(){
-        if(this.aspectRatio === true){
-          this.displayHandlers(['br']);
-        }
-        else {
-          this.displayHandlers();
-        }
-      }
-
-      _EventContextMenu(event) {
-          var element = this._firstPolymerObject(event);
-          var _this = this;
-          if (element.classList.contains('drag-resize')) {
-              // Object that can be dragged and dropped is selected.  So delete/copy/paste etc.
-              console.log("Object Selected");
-              if (this.selectedElements.length == 1) {
-                  // Single - No Align
-                  contextMenu.showMenu(this.menuData, event.target, ["add","delete","clipboard","undo"], event, function(command,node) {
-                      if (command != null) {
-                          _this.fire(command,_this.selectedElements[0]);
-                          console.log(command,node);
-                      }
-                  });
-              } else {
-                  // Multiple Objects
-                  contextMenu.showMenu(this.menuData, event.target, ["align","delete","clipboard","undo"], event, function(command,node) {
-                      if (command != null) {
-                          _this.fire(command,_this.selectedElements);
-                          console.log(command,node);
-                      }
-                  });
-              }
-              event.stopPropagation();
-              event.preventDefault();
-          } else if (event.path[0].classList.contains('Edit')) {
-              // Base Page - So Can add Items or do page functions
-              console.log("Base Selected")
-              contextMenu.showMenu(this.menuData, event.target, ["add","undo","clipboard-paste"], event, function(command,node) {
-                  if (command != null) {
-                      _this.fire(command,null);
-                      console.log(command,node);
-                  }
-              });
-              event.stopPropagation();
-              event.preventDefault();
-          } else {
-              // Ignore - Allow normal function of menu
-              console.log("Default Context Menu");
-          }
-      }
-
-      _EventMouseUp(event) {
-      }
-
-      _firstPolymerObject(event) {
-          // Internal - Find in the Event the first element that is a polymer object by searching for .$
-          var i, element;
-          for (i = 0; i < event.path.length; i++) {
-              // Check if Polymer Element exit if true
-              if (event.path[i].$ != undefined) {
-                  element = event.path[i];
-                  return element;
-              }
-          }
-      }
-
-      _checkForIgnore(event) {
-          var i, element;
-          for (i = 0; i < event.path.length; i++) {
-              // Check if Polymer Element exit if true
-              if (event.path[i].classList != null) {
-                  if (event.path[i].classList.contains("drag-drop-ignore")) {
-                      element = event.path[i];
-                      return true;
-                  }
-              }
-          }
-          return false;
-      }
-
-      _EventMouseDown(event) {
-          var i, element, firstElement;
-          // First Element - Saved
-          firstElement = event.path[0];
-          element = this._firstPolymerObject(event);
-          // Check if first Element is drag-resize-handler - if so ignore as helper object
-          if (firstElement.classList.contains('drag-resize-handlers') ||  firstElement.classList.contains('drag-resize-selected')) {
-              event.stopPropagation();
-              event.preventDefault();
-              return;
-          }
-          // If searching back clicked on a none Polymer Object.  Drop selectedElements.
-          if (element == undefined) {
-              this.selectedElements = [];
-              this.fire('edit-Cancel');
-          } else {
-
-            var filteredElements = element.classList.contains('drag-resize-handlers') ||  element.getAttribute('drag-resize') !== null;
-            if(!element.classList.contains('paper-drag-drop')){
-                if(filteredElements){
-                    event.stopPropagation();
-                    event.preventDefault();
-                    if (event.ctrlKey) {
-                        // Add to list
-                        this.focus(element,false);
-                    } else {
-                        // Replace List
-                        this.focus(element,true);
-                    }
-                }
-                else {
-                    // Clear All Selected Elements
-                    if (!this._checkForIgnore(event)) {
-                        this.selectedElements = [];
-                    }
-                }
-            } else {
-                // Already Selected Thus....
-  //              if (event.ctrlKey) {
-  //                // Add to list
-  //                this.focus(element,false);
-  //              } else {
-  //                // Forget All and Add One
-  //                this.selectedElements = [];
-  //                this.focus(element,true);
-  //              }
-            }
-        }
-  //      event.stopPropagation();
-  //      event.preventDefault();
-      }
-      _generateMenu(e) {
-          // Simply to block Menu
-          e.preventDefault();
-      }
-      _updateOverlay(pElement) {
-        pElement.style.left = this.bbox.elmX + 'px';
-        pElement.style.top = this.bbox.elmY + 'px';
-      }
-      _updateOverlayAll(pElement) {
-        pElement.style.width = this.bbox.elmW + 'px';
-        pElement.style.height = this.bbox.elmH + 'px';
-        pElement.style.left = this.bbox.elmX + 'px';
-        pElement.style.top = this.bbox.elmY + 'px';
-      }
-      _updateGlyph(pElement) {
-          pElement.Glyph.x = this.bbox.elmX + 'px';
-          pElement.Glyph.y = this.bbox.elmY + 'px';
-      }
-      _updateGlyphAll(pElement) {
-          pElement.Glyph.x = this.bbox.elmX + 'px';
-          pElement.Glyph.y = this.bbox.elmY + 'px';
-          pElement.Glyph.width = this.bbox.elmW + 'px';
-          pElement.Glyph.height = this.bbox.elmH + 'px';
-      }
-      _elementAlreadyAdded(newElement) {
-        var i=0;
-        var aData;
-        while (aData = this.selectedElements[i++]) {
-          if (aData.element == newElement) {
-            return aData;
-          }
-        }
-        i = this.push('selectedElements',{name:"paper_drag_selected_" + this.selectedElements.length, element: newElement, overlay: null});
-        return this.selectedElements[i - 1];
-      }
-      _parseIntDef(value) {
-        return parseInt(value,10) || 0;
-      }
-        /**
-         * Hook Paper Drag Drop into your Property Editor.
-         *
-         *
-         */
-      SetPropertyEditor(propertyEditor) {
-          if (typeof propertyEditor == 'function') {
-              this.propertyEditor = propertyEditor;
-          }
-      }
-      /**
-       * `DisableEdit` Used to Switch Off Edit Paper Drag Mode
-       */
-      DisableEdit() {
-          this.selectedElements = [];
-          this.enable = false;
-      }
-      /**
-       * `EnableEdit` Used to Switch On Edit Paper Drag Mode
-       */
-      EnableEdit() {
-          this.enable = true;
-      }
-
-      /**
-       * Fire - To replace Polymer 1.x version that disappeared!
-       * @param name of event
-       * @param detail
-       */
-      fire(name, details) {
-          document.dispatchEvent(new CustomEvent(name, {detail: details}));
-      }
-      //
-      // If Elements are altered external (not dragged) then update so that overlays move correctly.
-      //
-      _EventRefreshOverlays() {
-          var i;
-          for (i = 0; i < this.selectedElements.length; ++i) {
-              var element = this.selectedElements[i].element.$.node;
-              var overlay = this.selectedElements[i].overlay;
-              if (element) {
-                  var position = this.position(element);
-                  var dimension = this.dimension(element);
-                  overlay.style.width = dimension.width + 'px';
-                  overlay.style.height = dimension.height + 'px';
-                  overlay.style.left = position.left + 'px';
-                  overlay.style.top = position.top + 'px';
-              }
-          }
-      }
+        data.clientX = data.detail.x;
+        data.clientY = data.detail.y;
+        this.submenu.showMenu(data.target.submenu,this,this.menuType,data, this.handleSelect);
+        return false;
+    }
+    _onMenuSelect(data) {
+      event.stopPropagation();
+      event.preventDefault();
+      this._toggleMenuOff();
+      this.handleSelect(data.target.command,this.ownerNode);
+      return false;
+    }
   }
-  customElements.define(PaperDragDrop.is, PaperDragDrop);
-
+  customElements.define(JasContextMenu.is, JasContextMenu);
 </script>
