@@ -6,15 +6,18 @@
 <link rel="import" href="../iron-iconset-svg/iron-iconset-svg.html">
 <!--
   Polymer element to replace right click functionality.
+
   ### Styling
     
 The following custom properties are available for styling:
+
 Custom property | Description | Default
 ----------------|-------------|----------
 `--app-primary-color` | Background color of the menu when focused. | `#fff`
 `--context-text-color` | Text color within the menu. | `#333`
 `--context-link-text-color` | Text color and on hover background color for links<br>For text within 'A' tags. | `#0066aa`
 `--context-horizontal-rule-color` | Color of 'HR' tags. | `#bcbcbc`
+
   @element l2t-context-menu
   @demo demo/index.html
 -->
@@ -48,6 +51,12 @@ Custom property | Description | Default
         background-color: var(--app-primary-color, #0066aa);
         color: var(--app-primary-text-color, #fff);
       }
+      hr {
+        background-color: var(--app-primary-color, #0066aa);
+        border-color: var(--app-primary-color, #0066aa);
+        height: 1px;
+        border: 0;
+      }
     </style>
     <iron-iconset-svg name="contextmenu" size="24">
       <svg><defs>
@@ -56,16 +65,20 @@ Custom property | Description | Default
     </iron-iconset-svg>
 
     <div id="node" class="content">
-      <paper-listbox id="contextMenu" class="context-menu" allowOutsideScroll selected="-1">
+      <paper-listbox id="contextMenu" class="context-menu drag-drop-ignore" allowOutsideScroll selected="-1">
         <template id="resultList" is="dom-repeat" items="{{menu}}" as="m">
+          <template is="dom-if" if="[[m.isDivider]]">
+            <hr>
+          </template>
           <template is="dom-if" if="[[m.submenu]]">
               <paper-icon-item class="menu-trigger" role="menuitem" submenu="[[m.submenu]]" on-tap="_onSubMenuSelect">
                 <iron-icon class="menu-trigger" on-tap="_onSubMenuSelect" submenu="[[m.submenu]]" icon="contextmenu:arrow-drop-down" slot="item-icon">
-                </iron-icon>[[m.description]]
-              </paper-icon-item>
+                </iron-icon>[[m.description]]</paper-icon-item>
           </template>
-          <template is="dom-if" if="[[!m.submenu]]">
-            <paper-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect">[[m.description]]</paper-item>
+          <template is="dom-if" if="[[m.menu]]">
+            <paper-icon-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect">
+              <iron-icon class="menu-trigger" on-tap="_onMenuSelect" command="[[m.command]]" icon="[[m.icon]]" slot="item-icon">
+              </iron-icon>[[m.description]]</paper-icon-item>
           </template>
         </template>
       </paper-listbox>
@@ -74,8 +87,10 @@ Custom property | Description | Default
 </dom-module>
 <script>
   var contextMenu;
+
   class JasContextMenu extends Polymer.Element {
       static get is() { return 'jas-context-menu'; }
+
       static get properties() {
           return {
               /**
@@ -117,6 +132,7 @@ Custom property | Description | Default
               }
           }
       }
+
     constructor(mainMenu) {
           super();
           this.mainMenu = mainMenu;
@@ -246,11 +262,25 @@ Custom property | Description | Default
       var aMenu;
       var buildMenu = [];
       var i = 0;
+      // Convert menu into array if it isn't.  Supports multi menu options
+      if (!Array.isArray(menu)) {
+          var tempObject = menu;
+          menu = [];
+          if (tempObject != null) {
+              menu[0] = tempObject;
+          }
+      }
+      // Check if option is on menu
       while (aMenu = menuData[i++]) {
-        if (aMenu.type == menu) {
+        if ( menu.indexOf(aMenu.type) > -1) {
           if (aMenu.description == "-") {
+              aMenu.isDivider = true;
+              buildMenu.push(aMenu);
           } else {
-            buildMenu.push(aMenu);
+              if (aMenu.submenu == null) {
+                  aMenu.menu = true;
+              }
+              buildMenu.push(aMenu);
           }
         }
       }
