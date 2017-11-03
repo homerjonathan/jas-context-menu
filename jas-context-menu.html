@@ -87,25 +87,11 @@ Custom property | Description | Default
 </dom-module>
 <script>
   var contextMenu;
-
   class JasContextMenu extends Polymer.Element {
       static get is() { return 'jas-context-menu'; }
 
       static get properties() {
           return {
-              /**
-               * Sting for storing class name
-               * of which classes should be listened too
-               *
-               * @attribute parentclass
-               * @type String
-               * @default "default"
-               */
-              parentclass: {
-                  type: String,
-                  value: 'default',
-                  notify: true
-              },
               /**
                * Boolean for storing value
                * for menu state
@@ -137,6 +123,7 @@ Custom property | Description | Default
           super();
           this.mainMenu = mainMenu;
     }
+
     /**
      * Method to show the menu
      * updates class and vibrates on phones
@@ -176,6 +163,10 @@ Custom property | Description | Default
     _clickListener() {
       var $this = this;
       document.addEventListener("click",function(e){
+          if ($this.ignoreNextClick == true) {
+              $this.ignoreNextClick = false;
+              return;
+          }
         var t=$this._clickInsideElement(e,'menu-trigger');
         if(!t)
           var n=e.which||e.button;
@@ -184,7 +175,7 @@ Custom property | Description | Default
     }
     /**
      * Method to listen for keyup
-     * hides menu is ESC is pressed
+     * hides menu if ESC is pressed
      *
      */
     _keyupListener(){
@@ -250,7 +241,7 @@ Custom property | Description | Default
      *
      */
     connectedCallback() {
-        super.connectedCallback();
+      super.connectedCallback();
       this._listenerInit();
       // Main Menu - Sub Menu a copy is not linked as the main context menu
       if (contextMenu == undefined) {
@@ -292,8 +283,13 @@ Custom property | Description | Default
     }
     _openContextMenu(e) {
       var $this = this;
-      $this._toggleMenuOn();
-      $this._positionMenu(e);
+      // Trick to wait for component just about to be drawn (rendered),
+      // so that we can measure width and move around (near bottom open upwards etc) in the right spot!
+      Polymer.RenderStatus.beforeNextRender(this, function() {
+          // Now menu updated.  Run open context menu and position
+          $this._toggleMenuOn();
+          $this._positionMenu(e);
+      });
     }
     _onSubMenuSelect(data) {
         event.stopPropagation();
