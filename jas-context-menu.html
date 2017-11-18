@@ -308,7 +308,7 @@ Custom property | Description | Default
       event.stopPropagation();
       event.preventDefault();
       this._toggleMenuOff();
-      this.handleSelect(data.target.command,this.ownerNode);
+      this.handleSelect(data.target.command,this.ownerNode,data.target.subcommand);
       return false;
     }
   }
