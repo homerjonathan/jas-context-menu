@@ -76,8 +76,8 @@ Custom property | Description | Default
                 </iron-icon>[[m.description]]</paper-icon-item>
           </template>
           <template is="dom-if" if="[[m.menu]]">
-            <paper-icon-item role="menuitem" command="[[m.command]]" on-tap="_onMenuSelect">
-              <iron-icon class="menu-trigger" on-tap="_onMenuSelect" command="[[m.command]]" icon="[[m.icon]]" slot="item-icon">
+            <paper-icon-item role="menuitem" command="[[m.command]]" subcommand="[[m.subcommand]]" on-tap="_onMenuSelect">
+              <iron-icon class="menu-trigger" on-tap="_onMenuSelect" command="[[m.command]]" subcommand="[[m.subcommand]]" icon="[[m.icon]]" slot="item-icon">
               </iron-icon>[[m.description]]</paper-icon-item>
           </template>
         </template>
@@ -283,7 +283,14 @@ Custom property | Description | Default
     }
     _openContextMenu(e) {
       var $this = this;
-      // Trick to wait for component just about to be drawn (rendered),
+      // Stored incase required by Add Object here for example.  Unusual case but needs to be handled.
+      var element = app.Poly.page.shadowRoot.querySelector('#samsPageItems');
+      console.log(element);
+
+      this.coordsClicked = {clientX: e.clientX - element.offsetLeft, clientY:e.clientY - element.offsetTop};
+
+
+        // Trick to wait for component just about to be drawn (rendered),
       // so that we can measure width and move around (near bottom open upwards etc) in the right spot!
       Polymer.RenderStatus.beforeNextRender(this, function() {
           // Now menu updated.  Run open context menu and position
@@ -293,7 +300,7 @@ Custom property | Description | Default
     }
     _onSubMenuSelect(data) {
         event.stopPropagation();
-        event.preventDefault();
+//        event.preventDefault();
         if (this.submenu == undefined) {
             this.submenu = new JasContextMenu(this);
             this.submenu.setAttribute('id',"jassubmenu");
@@ -306,9 +313,9 @@ Custom property | Description | Default
     }
     _onMenuSelect(data) {
       event.stopPropagation();
-      event.preventDefault();
+//      event.preventDefault();
       this._toggleMenuOff();
-      this.handleSelect(data.target.command,this.ownerNode,data.target.subcommand);
+      this.handleSelect(data.target.command,this.ownerNode,data.target.subcommand, this.coordsClicked);
       return false;
     }
   }
