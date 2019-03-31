@@ -11,8 +11,8 @@
     "type": "git",
     "url": "git://github.com/homerjonathan/jas-context-menu.git"
   },
-  "homepage": "https://github.com/Link2Twenty/l2t-context-menu",
-  "name": "@polymer/jas-context-menu",
+  "homepage": "https://github.com/homerjonathan/jas-context-menu",
+  "name": "@jasoftware/jas-context-menu",
   "version": "3.0.0",
   "resolutions": {
     "inherits": "2.0.3",
@@ -23,7 +23,7 @@
   "main": "jas-context-menu.js",
   "contributors": [
     "Andrew Bone <AndrewB05@gmail.com>",
-    "Jonathan Homer"
+    "Jonathan Homer <jhomer@jasoftware.com>"
   ],
   "license": "MIT",
   "dependencies": {
