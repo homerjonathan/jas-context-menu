@@ -3,11 +3,11 @@
     <title>l2t-context-menu</title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#003366">
-    <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+    <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    <link rel="import" href="../../polymer/polymer.html">
-    <link rel="import" href="../l2t-context-menu.html">
-    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <script type="module" src="node_modules/@polymer/polymer/polymer-legacy.js"></script>
+    <script type="module" src="../jas-context-menu.js"></script>
+    <script type="module" src="node_modules/@polymer/iron-demo-helpers/demo-snippet.js"></script>
     <style>
       body {
         font-family: 'Roboto', sans-serif;
@@ -97,20 +97,23 @@
     </demo-snippet>
     <demo-snippet><b>Javascript:</b> (Just to simulate function)
       <template>
-        <script>
-          var storeClicked;
-          function storeDelete(e) {
-            if(e.which == 3) {
-              storeClicked = document.getElementById(e.target.id);
-            }
-          }
-          function deleteFake() {
-            storeClicked.className = "done";
-          }
-          function undeleteFake() {
-            storeClicked.className = "deletable";
-          }
-        </script>
+        <script type="module">
+import '@polymer/polymer/polymer-legacy.js';
+import '../jas-context-menu.js';
+import '@polymer/iron-demo-helpers/demo-snippet.js';
+var storeClicked;
+function storeDelete(e) {
+  if(e.which == 3) {
+    storeClicked = document.getElementById(e.target.id);
+  }
+}
+function deleteFake() {
+  storeClicked.className = "done";
+}
+function undeleteFake() {
+  storeClicked.className = "deletable";
+}
+</script>
       </template>
     </demo-snippet>
     </demo-snippet>
@@ -158,11 +161,14 @@
     </demo-snippet>
     <demo-snippet><b>Javascript:</b> (Just to simulate function)
       <template>
-        <script>
-          function colorUpdate(color) {
-            document.querySelector(".colorbox").style.backgroundColor = color;
-          }
-        </script>
+        <script type="module">
+import '@polymer/polymer/polymer-legacy.js';
+import '../jas-context-menu.js';
+import '@polymer/iron-demo-helpers/demo-snippet.js';
+function colorUpdate(color) {
+  document.querySelector(".colorbox").style.backgroundColor = color;
+}
+</script>
       </template>
     </demo-snippet>
   </body>
