@@ -17,17 +17,17 @@ Custom property | Description | Default
   from HTML and may be out of place here. Review them and
   then delete this comment!
 */
+import {PolymerElement} from '@polymer/polymer/polymer-element.js';
 import '@polymer/polymer/polymer-legacy.js';
-
 import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-item/paper-item.js';
 import '@polymer/paper-item/paper-icon-item.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-iconset-svg/iron-iconset-svg.js';
 var contextMenu;
-class JasContextMenu extends Polymer.Element {
+class JasContextMenu extends PolymerElement {
   static get template() {
-    return Polymer.html`
+    return html`
     <style>
       .context-menu {
         display: none;
