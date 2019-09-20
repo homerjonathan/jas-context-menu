@@ -13,7 +13,7 @@
     },
     "homepage": "https://github.com/homerjonathan/jas-context-menu",
     "name": "@jasoftware/jas-context-menu",
-    "version": "3.0.2",
+    "version": "3.0.3",
     "resolutions": {
         "inherits": "2.0.3",
         "samsam": "1.1.3",

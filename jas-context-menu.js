@@ -25,6 +25,7 @@ import '@polymer/paper-item/paper-icon-item.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-iconset-svg/iron-iconset-svg.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+export { contextMenu };
 var contextMenu;
 class JasContextMenu extends PolymerElement {
     static get template() {
